@@ -130,6 +130,15 @@ input {
   .workbench-shell { padding: 18px; }.workbench-nav { align-items: flex-start; gap: 16px; padding: 16px; }.steps { flex-wrap: wrap; justify-content: flex-end; gap: 8px; }.step-line { width: 10px; }.account-label { display: none; }.workbench-body { grid-template-columns: 1fr; }.workbench-main { border-right: 0; }.workbench-aside { min-height: 430px; }.project-fields { grid-template-columns: 1fr; }
 }
 
+/* The desktop workbench intentionally keeps the dense reference-board scale. */
+@media (min-width: 861px) {
+  .workbench-shell {
+    width: 125%;
+    min-height: 125vh;
+    zoom: .8;
+  }
+}
+
 @media (max-width: 580px) {
   .workbench-shell { padding: 10px; }.workbench-nav { display: block; }.steps { margin-top: 14px; }.workbench-main { padding: 25px 18px; }.file-table-wrap { overflow-x: auto; }.file-table-wrap table { min-width: 550px; }.workbench-aside { padding: 25px 18px; }
 }
