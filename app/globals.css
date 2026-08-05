@@ -143,9 +143,8 @@ input {
     display: grid;
     align-content: center;
     justify-items: center;
-    width: 125%;
-    min-height: 125vh;
-    zoom: .8;
+    width: 100%;
+    min-height: 100vh;
   }
 }
 
