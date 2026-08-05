@@ -1,5 +1,135 @@
 @import "tailwindcss";
 
 body {
+  margin: 0;
+  background: #e4e4e6;
+  color: #1d1f20;
   font-family: Arial, "Noto Sans KR", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.workbench-shell {
+  min-height: 100vh;
+  padding: 42px;
+  background-color: #e4e4e6;
+  background-image: linear-gradient(rgba(29, 31, 32, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 31, 32, 0.045) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.workbench-shell::before {
+  display: block;
+  max-width: 1280px;
+  margin: 0 auto 10px;
+  color: #416180;
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .14em;
+  content: "SCOPE 2 · 전기요금 고지서 파이프라인";
+}
+
+.workbench-shell {
+  --blue: #5980a6;
+  --ink: #1d1f20;
+  --line: rgba(29, 31, 32, .16);
+  --muted: rgba(29, 31, 32, .58);
+  max-width: none;
+}
+
+.workbench-nav,
+.workbench-body {
+  box-sizing: border-box;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: #f2f2f3;
+  border: 1px solid var(--line);
+}
+
+.workbench-nav {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 22px;
+  border-bottom: 0;
+}
+
+.brand {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.brand-kicker {
+  margin-bottom: 2px;
+  color: var(--blue);
+  font: 600 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .14em;
+}
+
+.steps { display: flex; align-items: center; gap: 14px; font-size: 13px; }
+.step { display: flex; align-items: center; gap: 7px; color: rgba(29,31,32,.45); }
+.step-active { color: #2c455d; font-weight: 700; }
+.step-number { display: grid; width: 20px; height: 20px; place-items: center; border: 1px solid var(--line); color: #5d5d60; font: 600 11px/1 ui-monospace, monospace; }
+.step-active .step-number { border-color: var(--blue); background: var(--blue); color: white; }
+.step-complete { border-color: #5980a6; color: #416180; }
+.step-line { width: 24px; height: 1px; background: var(--line); }
+.account-label { flex: 1; text-align: right; color: var(--muted); font-size: 12px; }
+
+.workbench-body { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 720px; }
+.workbench-main { padding: 30px 32px 32px; border-right: 1px solid var(--line); }
+.section-intro h1 { margin: 3px 0 5px; font-size: 30px; line-height: 1; letter-spacing: -.045em; }
+.section-intro > p:last-child { margin: 0; color: var(--muted); font-size: 13px; }
+.eyebrow { color: #416180; font: 600 10px/1 ui-monospace, monospace; letter-spacing: .13em; }
+
+.project-fields { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-top: 24px; }
+.field-label { display: block; color: #424244; font-size: 12px; font-weight: 700; }
+.field-label input { box-sizing: border-box; width: 100%; height: 42px; margin-top: 6px; border: 1px solid var(--line); border-radius: 0; background: #fbfbfc; padding: 0 11px; color: var(--ink); outline: none; }
+.field-label input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(89,128,166,.14); }
+.year-field { padding: 0; border: 0; }
+.year-options { display: flex; height: 42px; margin-top: 6px; }
+.year-options label { flex: 1; border: 1px solid var(--line); border-right: 0; background: #fbfbfc; text-align: center; font-size: 13px; line-height: 40px; cursor: pointer; }
+.year-options label:last-child { border-right: 1px solid var(--line); }
+.year-options input { position: absolute; opacity: 0; }
+.year-options label:has(input:checked) { position: relative; z-index: 1; border-color: #416180; background: #d6ebff; color: #1d2d3d; font-weight: 700; }
+
+.blueprint-frame { position: relative; border: 1px solid var(--line); }
+.corner-mark { position: absolute; z-index: 2; width: 11px; height: 11px; pointer-events: none; }
+.corner-mark::before, .corner-mark::after { position: absolute; background: rgba(29,31,32,.56); content: ""; }
+.corner-mark::before { top: 0; left: 5px; width: 1px; height: 11px; }
+.corner-mark::after { top: 5px; left: 0; width: 11px; height: 1px; }
+.corner-tl { top: -6px; left: -6px; }.corner-tr { top: -6px; right: -6px; }.corner-bl { bottom: -6px; left: -6px; }.corner-br { right: -6px; bottom: -6px; }
+
+.upload-zone { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 17px; padding: 20px; color: var(--blue); background: repeating-linear-gradient(135deg, transparent, transparent 9px, rgba(89,128,166,.05) 9px, rgba(89,128,166,.05) 18px); text-align: center; }
+.upload-zone strong { margin-top: 2px; color: var(--ink); font-size: 18px; letter-spacing: -.035em; }
+.upload-zone span { color: var(--muted); font-size: 12px; }
+.secondary-button { margin-top: 5px; border: 1px solid rgba(29,31,32,.32); background: #f8f8f9; padding: 5px 13px; color: #424244 !important; font-size: 12px !important; }
+
+.file-section { margin-top: 22px; }
+.file-section-heading { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.file-section-heading h2 { margin: 0; font-size: 16px; letter-spacing: -.02em; }
+.file-section-heading h2 b { color: #416180; }.file-section-heading span { margin-left: auto; color: var(--muted); font-size: 12px; }
+.file-table-wrap { overflow: hidden; border: 1px solid var(--line); background: #fbfbfc; }
+.file-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.file-table-wrap th { padding: 8px 10px; border-bottom: 1px solid var(--line); color: #5d5d60; text-align: left; font-size: 11px; font-weight: 700; }
+.file-table-wrap th:first-child { width: 46%; }.align-right { text-align: right !important; }.empty-row td { padding: 26px 10px; color: rgba(29,31,32,.5); text-align: center; }
+
+.workbench-aside { display: flex; flex-direction: column; gap: 18px; padding: 30px 22px 24px; background: #ececed; }
+.status-card, .factor-card { padding: 17px; background: #f7f7f8; }
+.card-kicker { margin: 0 0 8px; color: #416180; font: 600 10px/1 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+.coverage { display: flex; align-items: baseline; gap: 6px; margin: 0; }.coverage b { font-size: 42px; line-height: 1; letter-spacing: -.06em; }.coverage span { color: var(--muted); font-size: 14px; }
+.month-bar { display: flex; gap: 3px; margin-top: 10px; }.month-bar span { flex: 1; height: 22px; border: 1px dashed #749dc4; background: transparent; }.month-label { display: flex; justify-content: space-between; margin-top: 3px; color: rgba(29,31,32,.45); font-size: 10px; }.card-copy { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.factor-card { border: 1px solid var(--line); }.factor-card dl { margin: 0; }.factor-card dl div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: 12px; }.factor-card dt { color: var(--muted); }.factor-card dd { margin: 0; color: #2b2b2d; font-variant-numeric: tabular-nums; text-align: right; }
+.aside-action { margin-top: auto; }.blue-button { width: 100%; min-height: 46px; border-color: #1d2d3d; background: #416180; color: white; font-size: 14px; font-weight: 700; cursor: pointer; }.blue-button:hover { background: #2c455d; }.blue-button:disabled { cursor: wait; opacity: .7; }.aside-action > p:last-child { margin: 8px 0 0; color: var(--muted); font-size: 11px; text-align: center; }.form-error { margin: 0 0 9px; border: 1px solid #b56a5f; background: #fff3ef; padding: 8px; color: #8a2e22; font-size: 12px; }
+
+@media (max-width: 860px) {
+  .workbench-shell { padding: 18px; }.workbench-nav { align-items: flex-start; gap: 16px; padding: 16px; }.steps { flex-wrap: wrap; justify-content: flex-end; gap: 8px; }.step-line { width: 10px; }.account-label { display: none; }.workbench-body { grid-template-columns: 1fr; }.workbench-main { border-right: 0; }.workbench-aside { min-height: 430px; }.project-fields { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 580px) {
+  .workbench-shell { padding: 10px; }.workbench-nav { display: block; }.steps { margin-top: 14px; }.workbench-main { padding: 25px 18px; }.file-table-wrap { overflow-x: auto; }.file-table-wrap table { min-width: 550px; }.workbench-aside { padding: 25px 18px; }
 }
