@@ -132,7 +132,7 @@ input {
   .workbench-shell { padding: 18px; }.workbench-nav { align-items: flex-start; gap: 16px; padding: 16px; }.steps { flex-wrap: wrap; justify-content: flex-end; gap: 8px; }.step-line { width: 10px; }.account-label { display: none; }.workbench-body { grid-template-columns: 1fr; }.workbench-main { border-right: 0; }.workbench-aside { min-height: 430px; }.project-fields { grid-template-columns: 1fr; }
 }
 
-/* The desktop workbench stays at its original compact scale and is centered. */
+/* Scale the complete desktop workbench, then center that same frame. */
 @media (min-width: 861px) {
   body {
     overflow: hidden;
@@ -145,6 +145,10 @@ input {
     justify-items: center;
     width: 100%;
     min-height: 100vh;
+  }
+
+  .workbench-frame {
+    zoom: .8;
   }
 }
 
