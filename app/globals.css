@@ -21,16 +21,6 @@ input {
   background-size: 40px 40px;
 }
 
-.workbench-shell::before {
-  display: block;
-  max-width: 1280px;
-  margin: 0 auto 10px;
-  color: #416180;
-  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing: .14em;
-  content: "SCOPE 2 · 전기요금 고지서 파이프라인";
-}
-
 .workbench-shell {
   --blue: #5980a6;
   --ink: #1d1f20;
@@ -39,11 +29,22 @@ input {
   max-width: none;
 }
 
+.workbench-frame {
+  box-sizing: border-box;
+  width: min(1280px, 100%);
+}
+
+.pipeline-label {
+  margin: 0 0 10px;
+  color: #416180;
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .14em;
+}
+
 .workbench-nav,
 .workbench-body {
   box-sizing: border-box;
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
   background: #f2f2f3;
   border: 1px solid var(--line);
 }
@@ -139,9 +140,9 @@ input {
 
   .workbench-shell {
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    align-content: center;
+    justify-items: center;
     width: 125%;
     min-height: 125vh;
     zoom: .8;

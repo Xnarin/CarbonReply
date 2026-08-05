@@ -42,6 +42,8 @@ export function NewProjectForm() {
 
   return (
     <form action={formAction} className="workbench-shell">
+      <div className="workbench-frame">
+      <p className="pipeline-label">SCOPE 2 · 전기요금 고지서 파이프라인</p>
       <nav className="workbench-nav">
         <div className="brand">
           <span className="brand-kicker">CARBONREPLY</span>
@@ -145,6 +147,7 @@ export function NewProjectForm() {
             <p>프로젝트 생성 후 업로드 단계로 이동합니다.</p>
           </div>
         </aside>
+      </div>
       </div>
     </form>
   );
