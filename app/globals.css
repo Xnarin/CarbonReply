@@ -230,3 +230,30 @@ input {
 @media (max-width: 640px) { .upload-panel { padding: 0 22px 22px; }.upload-panel .project-progress { margin: 0 -22px 24px; } }
 
 .review-page { min-height: 100vh; box-sizing: border-box; padding: 42px; background-color: #e4e4e6; background-image: linear-gradient(rgba(29,31,32,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(29,31,32,.045) 1px, transparent 1px); background-size: 40px 40px; }.review-panel { width: min(1040px, 100%); box-sizing: border-box; margin: 0 auto; border: 1px solid var(--line); background: #f2f2f3; padding: 34px; }.review-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }.review-header p, .proof-label { margin: 0 0 6px; color: #416180; font: 600 10px/1 ui-monospace, monospace; letter-spacing: .13em; }.review-header h1 { margin: 0; font-size: 30px; letter-spacing: -.05em; }.review-header span { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; }.review-summary { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid var(--line); margin-top: 24px; background: #fbfbfc; }.review-summary section { padding: 19px; border-right: 1px solid var(--line); }.review-summary section:last-child { border-right: 0; }.review-summary span { display: block; color: #416180; font: 700 10px/1 ui-monospace, monospace; letter-spacing: .1em; }.review-summary strong { display: block; margin-top: 10px; color: #1d2d3d; font-size: 27px; letter-spacing: -.05em; }.review-summary strong i { color: var(--muted); font-size: 13px; font-style: normal; font-weight: 500; letter-spacing: 0; }.review-summary p { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }.emission-total { background: rgba(89,128,166,.08); }.calculation-proof { display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px 24px; margin-top: 22px; border-left: 3px solid #5980a6; background: #e9eff4; padding: 18px 20px; }.calculation-proof h2 { margin: 0; font-size: 16px; letter-spacing: -.03em; }.calculation-proof > p { margin: 0; color: #3e4f5e; font-size: 12px; line-height: 1.6; }.calculation-proof > p b { display: inline-block; width: 42px; color: #416180; }.calculation-proof small { grid-column: 1 / -1; color: var(--muted); font-size: 11px; line-height: 1.5; }.review-table-section { margin-top: 28px; }.review-table-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }.review-table-heading h2 { margin: 0; font-size: 17px; }.review-table-heading span { color: var(--muted); font-size: 12px; }.review-table-wrap { overflow-x: auto; margin-top: 9px; border: 1px solid var(--line); background: #fbfbfc; }.review-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12px; }.review-table-wrap th, .review-table-wrap td { border-bottom: 1px solid var(--line); padding: 11px 12px; text-align: left; white-space: nowrap; }.review-table-wrap th { color: #5d5d60; font-size: 11px; }.review-table-wrap tr:last-child td { border-bottom: 0; }.review-empty { height: 74px; text-align: center !important; color: var(--muted); }.usage-form { display: flex; align-items: center; gap: 6px; }.usage-form input { width: 86px; height: 31px; box-sizing: border-box; border: 1px solid var(--line); background: #fff; padding: 0 7px; text-align: right; }.usage-form span { color: var(--muted); }.usage-form button { border: 1px solid #416180; background: transparent; padding: 5px 8px; color: #2c587e; font-size: 11px; font-weight: 700; cursor: pointer; }.usage-form button:hover { background: #e5eef6; }.review-status { display: inline-block; border: 1px solid #b56a5f; padding: 3px 7px; color: #8a2e22; font-size: 11px; }.review-status.is-confirmed { border-color: #7f9f82; color: #35633b; }@media (max-width: 700px) { .review-page { padding: 16px; }.review-panel { padding: 22px; }.review-header { flex-direction: column; }.review-summary { grid-template-columns: 1fr; }.review-summary section { border-right: 0; border-bottom: 1px solid var(--line); }.review-summary section:last-child { border-bottom: 0; }.calculation-proof { grid-template-columns: 1fr; }.review-table-heading { align-items: flex-start; flex-direction: column; gap: 5px; } }
+
+/* Use the product typeface and restrained tracking for all interface labels. */
+.pipeline-label,
+.brand-kicker,
+.eyebrow,
+.card-kicker,
+.upload-header p,
+.review-header p,
+.proof-label,
+.report-header p,
+.report-hero p,
+.report-breakdown span,
+.review-summary span,
+.review-command span,
+.report-factor-card > p,
+.scope-list dt,
+.access-brand span,
+.access-header > p,
+.access-note > span,
+.form-panel-heading span,
+.issued-marker,
+.credential-box span,
+.source-pdf-panel header span {
+  font-family: var(--font-pretendard), Arial, sans-serif;
+  letter-spacing: .02em;
+  line-height: 1.2;
+}
