@@ -29,13 +29,14 @@ export async function registerCompany(_: AuthState, formData: FormData): Promise
     admin.from("companies").select("id, company_name, contact_email").eq("contact_email", email).maybeSingle(),
   ]);
   if (existingCompany || existingEmail) {
-    const existing = existingCompany ?? existingEmail;
-    if (existing?.company_name === companyName && existing.contact_email === email) {
+    // The contact email is the account owner. Permit that owner to request a
+    // fresh setup link even when the company name was entered differently.
+    if (existingEmail) {
       const authClient = await createSupabaseAuthClient();
       const redirectTo = await passwordSetupUrl();
       console.info("[auth:register] Sending password setup email", { redirectTo, existingUser: true });
       const { error } = await authClient.auth.resetPasswordForEmail(email, { redirectTo });
-      if (!error) return { emailSent: email, companyName };
+      if (!error) return { emailSent: email, companyName: existingEmail.company_name };
       console.error("[auth:register] Password setup email resend failed", {
         code: error.code,
         name: error.name,
