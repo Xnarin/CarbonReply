@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { DocumentUpload } from "@/components/document-upload";
+import { UploadedDocuments, type UploadedDocument } from "@/components/uploaded-documents";
 import { ProjectProgress } from "@/components/project-progress";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { requireCurrentCompany } from "@/lib/current-company";
@@ -9,22 +10,6 @@ export const dynamic = "force-dynamic";
 type UploadPageProps = {
   params: Promise<{ id: string }>;
 };
-
-type DocumentRow = {
-  id: string;
-  file_name: string;
-  size_bytes: number;
-  parse_status: "uploading" | "pending" | "completed" | "failed";
-  created_at: string;
-};
-
-function formatSize(size: number) {
-  return `${(size / 1024 / 1024).toFixed(size >= 10 * 1024 * 1024 ? 0 : 1)}MB`;
-}
-
-function statusLabel(status: DocumentRow["parse_status"]) {
-  return { uploading: "업로드 중", pending: "추출 대기", completed: "추출 완료", failed: "확인 필요" }[status];
-}
 
 export default async function UploadPage({ params }: UploadPageProps) {
   const { id } = await params;
@@ -48,7 +33,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   ]);
 
   if (!project) notFound();
-  const rows = (documents ?? []) as DocumentRow[];
+  const rows = (documents ?? []) as UploadedDocument[];
 
   return (
     <main className="upload-page">
@@ -67,33 +52,11 @@ export default async function UploadPage({ params }: UploadPageProps) {
 
         <DocumentUpload projectId={project.id} />
 
-        <section className="uploaded-files" aria-labelledby="uploaded-files-title">
-          <div className="uploaded-files-heading">
-            <h2 id="uploaded-files-title">업로드된 고지서 <b>{rows.length}</b></h2>
-            <span>업로드 후 자동 추출을 준비합니다.</span>
-          </div>
-          <div className="document-table-wrap">
-            <table>
-              <thead><tr><th>파일</th><th>용량</th><th>상태</th><th>업로드 시각</th></tr></thead>
-              <tbody>
-                {rows.length === 0 ? (
-                  <tr><td colSpan={4} className="document-empty">아직 업로드된 고지서가 없습니다.</td></tr>
-                ) : rows.map((document) => (
-                  <tr key={document.id}>
-                    <td>{document.file_name}</td>
-                    <td>{formatSize(document.size_bytes)}</td>
-                    <td><span className={`status-pill status-${document.parse_status}`}>{statusLabel(document.parse_status)}</span></td>
-                    <td>{new Intl.DateTimeFormat("ko-KR", { dateStyle: "short", timeStyle: "short" }).format(new Date(document.created_at))}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <UploadedDocuments documents={rows} projectId={project.id} />
 
         <footer className="upload-footer">
-          <span>{rows.length === 0 ? "고지서를 먼저 업로드해 주세요." : "고지서 업로드가 완료되었습니다."}</span>
-          {rows.length === 0 ? <button disabled type="button">추출 결과 확인하기</button> : <a className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</a>}
+          <span>{rows.some((row) => row.parse_status === "completed") ? "추출이 끝난 고지서를 검토할 수 있습니다." : "업로드 목록을 확인한 뒤 사용량 추출을 시작해 주세요."}</span>
+          {rows.some((row) => row.parse_status === "completed") ? <a className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</a> : <button disabled type="button">추출 결과 확인하기</button>}
         </footer>
       </section>
     </main>

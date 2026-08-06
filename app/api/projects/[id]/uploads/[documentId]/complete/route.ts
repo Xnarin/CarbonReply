@@ -32,9 +32,13 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     if (downloadError || !file) throw downloadError ?? new Error("Uploaded PDF is unavailable.");
     const extracted = await extractElectricityBill(await file.arrayBuffer());
     const month = `${extracted.billingYear}-${String(extracted.billingMonth).padStart(2, "0")}-01`;
-    const { error: activityError } = await supabase.from("monthly_activity").upsert(
+    const { data: existingActivity } = await supabase.from("monthly_activity").select("id").eq("project_id", projectId).eq("month", month).maybeSingle();
+    if (existingActivity) {
+      await supabase.from("documents").update({ parse_status: "failed", parsed_month: month, parsed_kwh: extracted.usageKwh }).eq("id", documentId).eq("project_id", projectId);
+      return Response.json({ error: "같은 청구월의 고지서가 이미 있습니다. 기존 파일을 삭제하거나 이 파일을 삭제해 교체해 주세요.", code: "duplicate_month", month }, { status: 409 });
+    }
+    const { error: activityError } = await supabase.from("monthly_activity").insert(
       { project_id: projectId, month, kwh: extracted.usageKwh, source: "gemini", confirmed: false },
-      { onConflict: "project_id,month" },
     );
     if (activityError) throw activityError;
     const { error: documentError } = await supabase.from("documents").update({

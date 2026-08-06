@@ -16,7 +16,7 @@ export default async function ReportPage({ params }: ReportPageProps) {
   const company = await requireCurrentCompany();
   const supabase = createSupabaseAdminClient();
   const [{ data: project }, { data: activities }] = await Promise.all([
-    supabase.from("projects").select("id, company_name, target_year").eq("id", id).eq("company_id", company.id).maybeSingle(),
+    supabase.from("projects").select("id, company_name, target_year, status").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase.from("monthly_activity").select("month, kwh, confirmed").eq("project_id", id).order("month"),
   ]);
   if (!project) notFound();
@@ -35,7 +35,7 @@ export default async function ReportPage({ params }: ReportPageProps) {
     </section><aside className="report-aside">
       <section className="report-factor-card"><p>APPLIED FACTOR</p><dl><div><dt>배출계수</dt><dd>0.4781 kgCO₂e/kWh</dd></div><div><dt>산정 방식</dt><dd>Location-based</dd></div><div><dt>기준</dt><dd>전력배출계수 · 2022.1.</dd></div></dl><code>tCO₂e = kWh × 0.4781 ÷ 1,000</code></section>
       <section className="report-note"><b>산정 근거</b><p>환경부 탄소중립 생활 실천 안내서에 제시된 전력 사용량 × 전력 배출계수 방식을 적용했습니다.</p><small>전기요금 고지서 기반 Scope 2 간이 추정치이며, 법정 검증·공시용 배출량은 아닙니다.</small></section>
-      <form action={completeProjectAndReturn} className="report-return"><input name="projectId" type="hidden" value={project.id} /><button type="submit">확정 결과 저장하고 산정 설정으로</button></form>
+      {project.status === "completed" ? <a className="report-return-link" href="/">산정 설정으로</a> : <form action={completeProjectAndReturn} className="report-return"><input name="projectId" type="hidden" value={project.id} /><button type="submit">확정 결과 저장하고 산정 설정으로</button></form>}
     </aside></div>
   </section></main>;
 }

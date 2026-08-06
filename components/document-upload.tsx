@@ -58,16 +58,10 @@ export function DocumentUpload({ projectId }: { projectId: string }) {
             .from("electricity-bills")
             .uploadToSignedUrl(ticket.path, ticket.token, files[index]);
           if (error) throw error;
-
-          const completeResponse = await fetch(
-            `/api/projects/${projectId}/uploads/${ticket.documentId}/complete`,
-            { method: "POST" },
-          );
-          if (!completeResponse.ok) throw new Error("업로드 완료 기록에 실패했습니다.");
         }),
       );
 
-      setMessage(`${files.length}개 고지서를 업로드했습니다. 추출 준비가 완료되었습니다.`);
+      setMessage(`${files.length}개 고지서를 업로드했습니다. 목록에서 확인한 뒤 추출을 시작해 주세요.`);
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "업로드 중 문제가 발생했습니다.");
