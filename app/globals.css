@@ -257,3 +257,17 @@ input {
   letter-spacing: .02em;
   line-height: 1.2;
 }
+
+/* Readability pass for the 90% desktop canvas. */
+.pipeline-label { font-size: 12px; }
+.brand-kicker, .access-brand span { font-size: 10px; }
+.eyebrow, .card-kicker, .upload-header p, .review-header p, .proof-label, .report-header p, .report-hero p, .review-summary span, .review-command span, .report-factor-card > p, .form-panel-heading span, .issued-marker, .credential-box span, .source-pdf-panel header span { font-size: 11px; }
+.scope-list dt { font-size: 12px; }
+.scope-list dd { font-size: 14px; }
+.section-intro > p:last-child, .setup-guide > p:last-child, .card-copy, .upload-header span, .review-header span, .report-header span { font-size: 13px; }
+.aside-action > p:last-child, .project-list span, .project-list small, .report-section-heading span, .report-note small, .calculation-proof small, .review-command p, .review-summary p, .source-evidence small, .source-preview-button, .manual-source, .source-pdf-panel header p, .source-pdf-stage > p { font-size: 12px; }
+.review-table-wrap table, .document-table-wrap table { font-size: 13px; }
+.review-table-wrap th, .document-table-wrap th { font-size: 12px; }
+.report-factor-card dl div { font-size: 12px; }
+.report-factor-card code, .report-month-grid span, .report-month-grid i { font-size: 11px; }
+.access-fields label, .access-switch, .access-note p, .form-panel-heading p { font-size: 13px; }
