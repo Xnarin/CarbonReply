@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export type ProjectFormState = {
   error?: string;
@@ -27,7 +27,7 @@ export async function createProject(
 
   let supabase;
   try {
-    supabase = createSupabaseServerClient();
+    supabase = createSupabaseAdminClient();
   } catch {
     return { error: "Supabase 연결 정보가 아직 설정되지 않았습니다." };
   }

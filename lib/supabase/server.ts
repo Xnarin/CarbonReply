@@ -1,15 +1,15 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
-export function createSupabaseServerClient() {
+export function createSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
 
-  if (!url || !publishableKey) {
-    throw new Error("Supabase 환경 변수가 설정되지 않았습니다.");
+  if (!url || !secretKey) {
+    throw new Error("Supabase server configuration is missing.");
   }
 
-  return createClient(url, publishableKey, {
+  return createClient(url, secretKey, {
     auth: { persistSession: false },
   });
 }
