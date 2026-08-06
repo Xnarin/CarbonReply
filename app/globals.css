@@ -4,7 +4,7 @@ body {
   margin: 0;
   background: #e4e4e6;
   color: #1d1f20;
-  font-family: Arial, "Noto Sans KR", sans-serif;
+  font-family: var(--font-pretendard), Arial, sans-serif;
   overflow-x: hidden;
 }
 
