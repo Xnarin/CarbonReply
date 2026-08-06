@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { DocumentUpload } from "@/components/document-upload";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { requireCurrentCompany } from "@/lib/current-company";
+import { signOut } from "@/app/actions/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,10 @@ export default async function UploadPage({ params }: UploadPageProps) {
             <h1>{project.company_name} · {project.target_year}</h1>
             <span>전기요금 고지서를 올리면 다음 단계에서 사용량을 추출합니다.</span>
           </div>
-          <a href="/" className="back-link">새 프로젝트</a>
+          <div className="upload-actions">
+            <a href="/" className="back-link">새 프로젝트</a>
+            <form action={signOut}><button className="logout-button" type="submit">로그아웃</button></form>
+          </div>
         </header>
 
         <DocumentUpload projectId={project.id} />

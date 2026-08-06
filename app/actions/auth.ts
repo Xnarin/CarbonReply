@@ -96,3 +96,9 @@ export async function signInCompany(_: AuthState, formData: FormData): Promise<A
   if (error) return { error: "회사명 또는 비밀번호를 확인해 주세요." };
   redirect("/");
 }
+
+export async function signOut() {
+  const authClient = await createSupabaseAuthClient();
+  await authClient.auth.signOut({ scope: "local" });
+  redirect("/login");
+}

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { createProject } from "@/app/actions/projects";
+import { signOut } from "@/app/actions/auth";
 
 const initialProjectState: { error?: string } = {};
 
@@ -58,7 +59,10 @@ export function NewProjectForm({ companyName }: { companyName: string }) {
           <span className="step-line" />
           <Step number={3} title="리포트" />
         </div>
-        <span className="account-label">협력사 탄소데이터 응답</span>
+        <div className="account-area">
+          <span className="account-label">협력사 탄소데이터 응답</span>
+          <button className="logout-button" formAction={signOut} type="submit">로그아웃</button>
+        </div>
       </nav>
 
       <div className="workbench-body">
