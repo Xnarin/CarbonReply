@@ -141,9 +141,9 @@ export function NewProjectForm({ companyName }: { companyName: string }) {
           <section className="factor-card">
             <p className="card-kicker">적용 예정 계수</p>
             <dl>
-              <div><dt>배출계수</dt><dd>0.4747 kgCO₂e/kWh</dd></div>
-              <div><dt>출처</dt><dd>국가 온실가스 계수</dd></div>
-              <div><dt>버전 · 적용연도</dt><dd>v1.2 · 2025</dd></div>
+              <div><dt>배출계수</dt><dd>0.4781 kgCO₂e/kWh</dd></div>
+              <div><dt>출처</dt><dd>환경부 안내서 · EG-TIPS</dd></div>
+              <div><dt>기준</dt><dd>전력배출계수 · 2022.1.</dd></div>
             </dl>
           </section>
 

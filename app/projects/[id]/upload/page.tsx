@@ -93,7 +93,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
 
         <footer className="upload-footer">
           <span>{rows.length === 0 ? "고지서를 먼저 업로드해 주세요." : "고지서 업로드가 완료되었습니다."}</span>
-          <button disabled={rows.length === 0} type="button">추출 결과 확인하기</button>
+          {rows.length === 0 ? <button disabled type="button">추출 결과 확인하기</button> : <a className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</a>}
         </footer>
       </section>
     </main>
