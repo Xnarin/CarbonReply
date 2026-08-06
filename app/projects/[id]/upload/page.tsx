@@ -3,7 +3,6 @@ import { DocumentUpload } from "@/components/document-upload";
 import { ProjectProgress } from "@/components/project-progress";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { requireCurrentCompany } from "@/lib/current-company";
-import { signOut } from "@/app/actions/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +62,6 @@ export default async function UploadPage({ params }: UploadPageProps) {
           </div>
           <div className="upload-actions">
             <a href="/" className="back-link">새 프로젝트</a>
-            <form action={signOut}><button className="logout-button" type="submit">로그아웃</button></form>
           </div>
         </header>
 
