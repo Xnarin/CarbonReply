@@ -271,3 +271,4 @@ input {
 .report-factor-card dl div { font-size: 12px; }
 .report-factor-card code, .report-month-grid span, .report-month-grid i { font-size: 11px; }
 .access-fields label, .access-switch, .access-note p, .form-panel-heading p { font-size: 13px; }
+.factor-card a, .report-factor-card a { color: #2c587e; font-weight: 700; text-underline-offset: 2px; }.factor-warning, .factor-inline-warning { display: block; margin: 11px 0 0; border-left: 2px solid #b07a39; background: #fff7e9; padding: 8px 9px; color: #79501e; font-size: 12px; line-height: 1.5; }.factor-inline-warning { margin-top: 10px; }
