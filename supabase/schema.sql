@@ -73,7 +73,7 @@ set public = excluded.public,
 create table if not exists public.companies (
   id uuid primary key,
   company_name text not null check (char_length(trim(company_name)) between 1 and 120),
-  login_email text not null unique,
+  contact_email text not null unique,
   auth_user_id uuid not null unique references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
