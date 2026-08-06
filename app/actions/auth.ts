@@ -25,10 +25,24 @@ export async function registerCompany(_: AuthState, formData: FormData): Promise
 
   const admin = createSupabaseAdminClient();
   const [{ data: existingCompany }, { data: existingEmail }] = await Promise.all([
-    admin.from("companies").select("id").ilike("company_name", companyName).maybeSingle(),
-    admin.from("companies").select("id").eq("contact_email", email).maybeSingle(),
+    admin.from("companies").select("id, company_name, contact_email").ilike("company_name", companyName).maybeSingle(),
+    admin.from("companies").select("id, company_name, contact_email").eq("contact_email", email).maybeSingle(),
   ]);
-  if (existingCompany || existingEmail) return { error: "이미 등록된 회사명 또는 이메일입니다. 로그인해 주세요." };
+  if (existingCompany || existingEmail) {
+    const existing = existingCompany ?? existingEmail;
+    if (existing?.company_name === companyName && existing.contact_email === email) {
+      const authClient = await createSupabaseAuthClient();
+      const { error } = await authClient.auth.resetPasswordForEmail(email, { redirectTo: await passwordSetupUrl() });
+      if (!error) return { emailSent: email, companyName };
+      console.error("[auth:register] Password setup email resend failed", {
+        code: error.code,
+        name: error.name,
+        status: error.status,
+      });
+      return { error: "비밀번호 설정 메일을 다시 보내지 못했습니다. 잠시 후 시도해 주세요." };
+    }
+    return { error: "이미 등록된 회사명 또는 이메일입니다. 로그인해 주세요." };
+  }
 
   const companyId = randomUUID();
   const { data: authData, error: authError } = await admin.auth.admin.createUser({ email, password: randomBytes(24).toString("base64url"), email_confirm: true });
