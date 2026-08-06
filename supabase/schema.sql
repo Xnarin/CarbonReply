@@ -68,3 +68,16 @@ on conflict (id) do update
 set public = excluded.public,
     file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;
+
+-- Company credentials and row ownership. This migration is applied after the base schema.
+create table if not exists public.companies (
+  id uuid primary key,
+  company_name text not null check (char_length(trim(company_name)) between 1 and 120),
+  login_email text not null unique,
+  auth_user_id uuid not null unique references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+create unique index if not exists companies_company_name_normalized_idx on public.companies (lower(company_name));
+alter table public.companies enable row level security;
+alter table public.projects add column if not exists company_id uuid references public.companies(id) on delete cascade;
+create index if not exists projects_company_id_created_at_idx on public.projects (company_id, created_at desc);

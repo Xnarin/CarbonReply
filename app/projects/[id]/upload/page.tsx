@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { DocumentUpload } from "@/components/document-upload";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { requireCurrentCompany } from "@/lib/current-company";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ function statusLabel(status: DocumentRow["parse_status"]) {
 
 export default async function UploadPage({ params }: UploadPageProps) {
   const { id } = await params;
+  const company = await requireCurrentCompany();
   let supabase;
   try {
     supabase = createSupabaseAdminClient();
@@ -36,7 +38,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   }
 
   const [{ data: project }, { data: documents }] = await Promise.all([
-    supabase.from("projects").select("id, company_name, target_year").eq("id", id).maybeSingle(),
+    supabase.from("projects").select("id, company_name, target_year").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase
       .from("documents")
       .select("id, file_name, size_bytes, parse_status, created_at")

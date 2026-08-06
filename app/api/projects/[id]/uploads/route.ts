@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getCurrentCompany } from "@/lib/current-company";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,8 @@ function safeFileName(name: string) {
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = await params;
+  const company = await getCurrentCompany();
+  if (!company) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
   let body: { files?: UploadInput[] };
 
   try {
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Response.json({ error: "Supabase 서버 설정이 필요합니다." }, { status: 503 });
   }
 
-  const { data: project } = await supabase.from("projects").select("id").eq("id", projectId).maybeSingle();
+  const { data: project } = await supabase.from("projects").select("id").eq("id", projectId).eq("company_id", company.id).maybeSingle();
   if (!project) return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
 
   const documents = files.map((file) => ({

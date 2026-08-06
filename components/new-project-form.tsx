@@ -36,7 +36,7 @@ function SubmitButton() {
   );
 }
 
-export function NewProjectForm() {
+export function NewProjectForm({ companyName }: { companyName: string }) {
   const [state, formAction] = useActionState(createProject, initialProjectState);
   const currentYear = new Date().getFullYear();
 
@@ -70,7 +70,7 @@ export function NewProjectForm() {
           <div className="project-fields">
             <label className="field-label">
               회사명
-              <input defaultValue="" name="companyName" placeholder="예: 대성정밀 주식회사" required />
+              <input defaultValue={companyName} name="companyName" readOnly />
             </label>
             <fieldset className="year-field">
               <legend className="field-label">산정 연도</legend>
