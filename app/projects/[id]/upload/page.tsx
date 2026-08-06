@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { DocumentUpload } from "@/components/document-upload";
+import { ProjectProgress } from "@/components/project-progress";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { requireCurrentCompany } from "@/lib/current-company";
 import { signOut } from "@/app/actions/auth";
@@ -53,6 +54,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   return (
     <main className="upload-page">
       <section className="upload-panel">
+        <ProjectProgress activeStep={2} projectId={project.id} />
         <header className="upload-header">
           <div>
             <p>02 / BILL UPLOAD</p>

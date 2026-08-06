@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { confirmMonthlyUsage } from "@/app/actions/review";
 import { requireCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { ProjectProgress } from "@/components/project-progress";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const totalKg = totalKwh * ELECTRICITY_FACTOR;
   const confirmedCount = rows.filter((row) => row.confirmed).length;
   return <main className="review-page"><section className="review-panel">
+    <ProjectProgress activeStep={3} projectId={project.id} />
     <header className="review-header"><div><p>03 / EXTRACTION REVIEW</p><h1>추출 결과 확인</h1><span>{project.company_name} · {project.target_year}년 전기 사용량</span></div><a href={`/projects/${project.id}/upload`} className="back-link">고지서 추가하기</a></header>
     <div className="review-summary"><section><span>확인 완료</span><strong>{confirmedCount}<i> / {rows.length}개월</i></strong><p>AI가 읽은 사용량을 고지서와 비교해 확정해 주세요.</p></section><section><span>총 전기 사용량</span><strong>{totalKwh.toLocaleString()}<i> kWh</i></strong><p>확정 전 수치도 합계에는 포함됩니다.</p></section><section className="emission-total"><span>Scope 2 추정 배출량</span><strong>{(totalKg / 1000).toFixed(3)}<i> tCO₂e</i></strong><p>{totalKwh.toLocaleString()} kWh × {ELECTRICITY_FACTOR} kgCO₂e/kWh</p></section></div>
     <section className="calculation-proof" aria-label="산정 근거"><div><p className="proof-label">CALCULATION BASIS</p><h2>전력 사용에 따른 Scope 2 추정</h2></div><p><b>산식</b> 전기 사용량(kWh) × 전력 배출계수(0.4781 kgCO₂e/kWh)</p><p><b>출처</b> 환경부 탄소중립 생활 실천 안내서 · EG-TIPS 전력배출계수(2022.1.)</p><small>본 결과는 전기요금 고지서의 사용량을 기반으로 한 간이 추정치이며, 법정 검증 또는 공시용 배출량은 아닙니다.</small></section>
