@@ -17,7 +17,7 @@ function asExtraction(value: unknown): BillExtraction | null {
   const usageKwh = Number(record.usageKwh);
   if (!Number.isInteger(billingYear) || billingYear < 2020 || billingYear > 2100) return null;
   if (!Number.isInteger(billingMonth) || billingMonth < 1 || billingMonth > 12) return null;
-  if (!Number.isFinite(usageKwh) || usageKwh < 0 || usageKwh > 1_000_000_000) return null;
+  if (!Number.isFinite(usageKwh)) return null;
   return { billingYear, billingMonth, usageKwh };
 }
 

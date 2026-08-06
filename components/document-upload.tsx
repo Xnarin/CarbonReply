@@ -10,7 +10,7 @@ type UploadTicket = {
   token: string;
 };
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 export function DocumentUpload({ projectId }: { projectId: string }) {
   const router = useRouter();
@@ -31,7 +31,7 @@ export function DocumentUpload({ projectId }: { projectId: string }) {
       (file) => file.type !== "application/pdf" || file.size === 0 || file.size > MAX_FILE_SIZE,
     );
     if (invalidFile) {
-      setMessage("PDF 파일만 가능하며, 파일당 최대 20MB까지 올릴 수 있습니다.");
+      setMessage("PDF 파일만 가능하며, 파일당 최대 15MB까지 올릴 수 있습니다.");
       return;
     }
 
@@ -75,7 +75,7 @@ export function DocumentUpload({ projectId }: { projectId: string }) {
       <input accept="application/pdf" disabled={isUploading} multiple onChange={handleFiles} type="file" />
       <span className="upload-symbol" aria-hidden="true">↑</span>
       <strong>{isUploading ? "고지서를 올리고 있습니다" : "전기요금 고지서를 선택하세요"}</strong>
-      <span>PDF · 파일당 최대 20MB · 한 번에 최대 12개</span>
+      <span>PDF · 파일당 최대 15MB · 한 번에 최대 12개</span>
       {message ? <small role="status">{message}</small> : null}
     </label>
   );

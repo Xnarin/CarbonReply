@@ -1,6 +1,7 @@
 import { getCurrentCompany } from "@/lib/current-company";
 import { extractElectricityBill } from "@/lib/gemini";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { isValidPdfHeader, isValidUsageKwh } from "@/lib/bill-validation";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id")
+    .select("id, target_year")
     .eq("id", projectId)
     .eq("company_id", company.id)
     .maybeSingle();
@@ -30,7 +31,25 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
   try {
     const { data: file, error: downloadError } = await supabase.storage.from("electricity-bills").download(document.storage_path);
     if (downloadError || !file) throw downloadError ?? new Error("Uploaded PDF is unavailable.");
-    const extracted = await extractElectricityBill(await file.arrayBuffer());
+    const pdf = await file.arrayBuffer();
+    if (!isValidPdfHeader(pdf)) {
+      await supabase.from("documents").update({ parse_status: "failed" }).eq("id", documentId).eq("project_id", projectId);
+      return Response.json({ error: "PDF 확장자와 실제 파일 형식이 일치하지 않습니다.", code: "invalid_pdf" }, { status: 422 });
+    }
+    const extracted = await extractElectricityBill(pdf);
+    if (extracted.billingYear !== project.target_year) {
+      await supabase.from("documents").update({ parse_status: "failed", parsed_kwh: extracted.usageKwh }).eq("id", documentId).eq("project_id", projectId);
+      return Response.json({
+        error: `${extracted.billingYear}년 고지서입니다. 이 프로젝트의 산정연도 ${project.target_year}년과 일치하지 않습니다.`,
+        code: "year_mismatch",
+        billingYear: extracted.billingYear,
+        expectedYear: project.target_year,
+      }, { status: 409 });
+    }
+    if (!isValidUsageKwh(extracted.usageKwh)) {
+      await supabase.from("documents").update({ parse_status: "failed" }).eq("id", documentId).eq("project_id", projectId);
+      return Response.json({ error: "추출된 사용량이 허용 범위를 벗어났습니다. 원본을 확인해 주세요.", code: "invalid_usage" }, { status: 422 });
+    }
     const month = `${extracted.billingYear}-${String(extracted.billingMonth).padStart(2, "0")}-01`;
     const { data: existingActivity } = await supabase.from("monthly_activity").select("id").eq("project_id", projectId).eq("month", month).maybeSingle();
     if (existingActivity) {

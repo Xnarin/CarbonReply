@@ -4,7 +4,7 @@ import { getCurrentCompany } from "@/lib/current-company";
 
 export const runtime = "nodejs";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 const MAX_FILES = 12;
 
 type UploadInput = { name?: unknown; size?: unknown; type?: unknown };
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       file.size <= MAX_FILE_SIZE,
   );
   if (!validFiles) {
-    return Response.json({ error: "PDF 파일만 가능하며, 파일당 최대 20MB입니다." }, { status: 400 });
+    return Response.json({ error: "PDF 파일만 가능하며, 파일당 최대 15MB입니다." }, { status: 400 });
   }
 
   let supabase;
