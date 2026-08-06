@@ -180,6 +180,13 @@ input {
 @media (max-width: 700px) { .review-panel { padding: 0 22px 22px; }.review-panel .project-progress { margin: 0 -22px 24px; } }
 @media (max-width: 640px) { .upload-panel { padding: 0 22px 22px; }.upload-panel .project-progress { margin: 0 -22px 24px; } }
 
+/* Desktop scale is deliberately different per stage; every visual keeps its own center point. */
+@media (min-width: 861px) {
+  .workbench-frame { zoom: .88; }
+  .review-page { place-items: center; }
+  .review-panel { transform: scale(.9); transform-origin: center center; }
+}
+
 /* Compact the data-heavy steps and make setup a useful project hub. */
 .upload-panel { width: min(820px, 100%); padding: 0 26px 26px; }.upload-panel .project-progress { margin: 0 -26px 24px; }.review-panel { width: min(880px, 100%); padding: 0 26px 26px; }.review-panel .project-progress { margin: 0 -26px 24px; }.scope-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 15px 0; }.scope-list div { display: grid; gap: 5px; }.scope-list dt { color: #416180; font: 700 10px/1 ui-monospace, monospace; letter-spacing: .08em; }.scope-list dd { margin: 0; color: var(--ink); font-size: 12px; line-height: 1.5; }.setup-guide > p:last-child { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }.existing-projects { margin-top: 22px; }.existing-projects h2 { margin: 5px 0 10px; font-size: 16px; }.project-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }.project-list a { display: grid; gap: 7px; border: 1px solid var(--line); background: #fbfbfc; padding: 12px; color: var(--ink); text-decoration: none; }.project-list a:hover { border-color: #5980a6; background: #f3f8fc; }.project-list b { font-size: 13px; }.project-list span { color: #416180; font-size: 11px; }
 @media (max-width: 860px) { .scope-list, .project-list { grid-template-columns: 1fr; } }
