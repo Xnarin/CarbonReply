@@ -18,4 +18,19 @@ export async function confirmMonthlyUsage(formData: FormData) {
 
   await supabase.from("monthly_activity").update({ kwh, confirmed: true }).eq("project_id", projectId).eq("month", month);
   revalidatePath(`/projects/${projectId}/review`);
+  revalidatePath(`/projects/${projectId}/report`);
+}
+
+export async function confirmAllMonthlyUsage(formData: FormData) {
+  const projectId = String(formData.get("projectId") ?? "");
+  if (!projectId) return;
+  const company = await getCurrentCompany();
+  if (!company) return;
+  const supabase = createSupabaseAdminClient();
+  const { data: project } = await supabase.from("projects").select("id").eq("id", projectId).eq("company_id", company.id).maybeSingle();
+  if (!project) return;
+
+  await supabase.from("monthly_activity").update({ confirmed: true }).eq("project_id", projectId);
+  revalidatePath(`/projects/${projectId}/review`);
+  revalidatePath(`/projects/${projectId}/report`);
 }
