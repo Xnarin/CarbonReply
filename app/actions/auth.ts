@@ -32,9 +32,20 @@ export async function registerCompany(_: AuthState, formData: FormData): Promise
 
   const companyId = randomUUID();
   const { data: authData, error: authError } = await admin.auth.admin.createUser({ email, password: randomBytes(24).toString("base64url"), email_confirm: true });
-  if (authError || !authData.user) return { error: "계정을 만들지 못했습니다. 잠시 후 다시 시도해 주세요." };
+  if (authError || !authData.user) {
+    console.error("[auth:register] Supabase user creation failed", {
+      code: authError?.code,
+      name: authError?.name,
+      status: authError?.status,
+    });
+    return { error: "계정을 만들지 못했습니다. 잠시 후 다시 시도해 주세요." };
+  }
   const { error: companyError } = await admin.from("companies").insert({ id: companyId, company_name: companyName, contact_email: email, auth_user_id: authData.user.id });
   if (companyError) {
+    console.error("[auth:register] Company record creation failed", {
+      code: companyError.code,
+      message: companyError.message,
+    });
     await admin.auth.admin.deleteUser(authData.user.id);
     return { error: "회사 정보를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요." };
   }
@@ -42,6 +53,11 @@ export async function registerCompany(_: AuthState, formData: FormData): Promise
   const authClient = await createSupabaseAuthClient();
   const { error: emailError } = await authClient.auth.resetPasswordForEmail(email, { redirectTo: await passwordSetupUrl() });
   if (emailError) {
+    console.error("[auth:register] Password setup email failed", {
+      code: emailError.code,
+      name: emailError.name,
+      status: emailError.status,
+    });
     await admin.from("companies").delete().eq("id", companyId);
     await admin.auth.admin.deleteUser(authData.user.id);
     return { error: "비밀번호 설정 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요." };
