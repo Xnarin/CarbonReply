@@ -32,7 +32,9 @@ export async function registerCompany(_: AuthState, formData: FormData): Promise
     const existing = existingCompany ?? existingEmail;
     if (existing?.company_name === companyName && existing.contact_email === email) {
       const authClient = await createSupabaseAuthClient();
-      const { error } = await authClient.auth.resetPasswordForEmail(email, { redirectTo: await passwordSetupUrl() });
+      const redirectTo = await passwordSetupUrl();
+      console.info("[auth:register] Sending password setup email", { redirectTo, existingUser: true });
+      const { error } = await authClient.auth.resetPasswordForEmail(email, { redirectTo });
       if (!error) return { emailSent: email, companyName };
       console.error("[auth:register] Password setup email resend failed", {
         code: error.code,
@@ -65,7 +67,9 @@ export async function registerCompany(_: AuthState, formData: FormData): Promise
   }
 
   const authClient = await createSupabaseAuthClient();
-  const { error: emailError } = await authClient.auth.resetPasswordForEmail(email, { redirectTo: await passwordSetupUrl() });
+  const redirectTo = await passwordSetupUrl();
+  console.info("[auth:register] Sending password setup email", { redirectTo, existingUser: false });
+  const { error: emailError } = await authClient.auth.resetPasswordForEmail(email, { redirectTo });
   if (emailError) {
     console.error("[auth:register] Password setup email failed", {
       code: emailError.code,
