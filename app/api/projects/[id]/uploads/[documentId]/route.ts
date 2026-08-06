@@ -3,6 +3,21 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string; documentId: string }> }) {
+  const { id: projectId, documentId } = await params;
+  const company = await getCurrentCompany();
+  if (!company) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  const supabase = createSupabaseAdminClient();
+  const { data: project } = await supabase.from("projects").select("id").eq("id", projectId).eq("company_id", company.id).maybeSingle();
+  if (!project) return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
+
+  const { data: document } = await supabase.from("documents").select("storage_path").eq("id", documentId).eq("project_id", projectId).maybeSingle();
+  if (!document) return Response.json({ error: "원본 고지서를 찾을 수 없습니다." }, { status: 404 });
+  const { data, error } = await supabase.storage.from("electricity-bills").createSignedUrl(document.storage_path, 300);
+  if (error || !data?.signedUrl) return Response.json({ error: "원본 고지서를 열지 못했습니다." }, { status: 500 });
+  return Response.redirect(data.signedUrl);
+}
+
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string; documentId: string }> }) {
   const { id: projectId, documentId } = await params;
   const company = await getCurrentCompany();
