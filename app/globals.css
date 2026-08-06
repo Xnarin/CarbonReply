@@ -78,8 +78,8 @@ input {
 .step-active { color: #2c455d; font-weight: 700; }
 .step-number { display: grid; width: 20px; height: 20px; place-items: center; border: 1px solid var(--line); color: #5d5d60; font: 600 11px/1 ui-monospace, monospace; }
 .step-active .step-number { border-color: #2c455d; background: transparent; color: inherit; }
-.step-complete { border-color: #5980a6; color: #416180; }
-.step-line { width: 24px; height: 1px; background: var(--line); }
+.step-number.step-complete { border-color: #416180; background: rgba(89,128,166,.1); color: #2c587e; font-weight: 800; }
+.step-line { flex: 0 0 auto; width: 24px; height: 1px; background: #aeb8c1; }
 .account-area { display: flex; flex: 1; align-items: center; justify-content: flex-end; gap: 12px; }.account-label { color: var(--muted); font-size: 12px; }.logout-button { border: 1px solid rgba(29,31,32,.28); background: transparent; padding: 5px 9px; color: #416180; font-size: 11px; font-weight: 700; cursor: pointer; }.logout-button:hover { border-color: #416180; background: rgba(89,128,166,.08); }
 
 .workbench-body { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 720px; }
