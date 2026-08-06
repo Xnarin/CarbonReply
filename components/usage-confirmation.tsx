@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, createContext, useContext, useEffect, useState, useTransition } from "react";
+import { FormEvent, ReactNode, createContext, useContext, useState, useTransition } from "react";
 import { confirmAllMonthlyUsage, confirmMonthlyUsage } from "@/app/actions/review";
 
 type OptimisticContextValue = {
@@ -25,10 +25,6 @@ export function ConfirmAllUsageForm({ allConfirmed, disabled, projectId }: { all
   const { allOptimistic, setAllOptimistic } = useConfirmationOptimistic();
   const [failed, setFailed] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (allConfirmed) setAllOptimistic(true);
-  }, [allConfirmed, setAllOptimistic]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,8 +51,6 @@ export function UsageConfirmationCells({ confirmed, emissionsKg, kwh, month, mon
   const [failed, setFailed] = useState(false);
   const [isPending, startTransition] = useTransition();
   const displayConfirmed = confirmed || localConfirmed || allOptimistic;
-
-  useEffect(() => setLocalConfirmed(confirmed), [confirmed]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

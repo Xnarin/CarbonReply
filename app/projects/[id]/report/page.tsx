@@ -1,4 +1,5 @@
 import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
 import { ProjectProgress } from "@/components/project-progress";
 import { requireCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
@@ -39,7 +40,8 @@ export default async function ReportPage({ params }: ReportPageProps) {
       <section className={`report-quality-card validation-grade-${validation.grade.toLowerCase()}`}><p>DATA QUALITY</p><strong>검증 등급 {validation.grade}</strong><span>{validation.grade === "A" ? "12개월 자료가 완비되고 이상치가 없습니다." : validation.grade === "B" ? `누락 ${validation.missingMonths.length}개월 (${formatMonthNumbers(validation.missingMonths)})이 있는 부분연도 결과입니다.` : "통계적 주의값을 원본과 대조해 개별 확정한 결과입니다."}</span></section>
       <section className="report-factor-card"><p>APPLIED FACTOR</p><dl><div><dt>배출계수</dt><dd>{electricityFactor.value} {electricityFactor.unit}</dd></div><div><dt>산정 방식</dt><dd>Location-based</dd></div><div><dt>계수 연도</dt><dd>{electricityFactor.factorYear}년</dd></div><div><dt>출처</dt><dd><a href={ELECTRICITY_FACTOR_SOURCE_URL} rel="noreferrer" target="_blank">EG-TIPS 원문 ↗</a></dd></div></dl><code>tCO₂e = kWh × {electricityFactor.value} ÷ 1,000</code>{electricityFactor.isFallback ? <small className="factor-warning">{project.target_year}년 공식 계수가 없어 {electricityFactor.factorYear}년 계수를 임시 적용했습니다.</small> : null}</section>
       <section className="report-note"><b>산정 근거</b><p>EG-TIPS에 공개된 연도별 전력배출계수와 전력 사용량을 적용한 Location-based 방식입니다.</p><small>전기요금 고지서 기반 Scope 2 간이 추정치이며, 법정 검증·공시용 배출량은 아닙니다.</small></section>
-      {project.status === "completed" ? <a className="report-return-link" href="/">산정 설정으로</a> : <form action={completeProjectAndReturn} className="report-return"><input name="projectId" type="hidden" value={project.id} /><button type="submit">확정 결과 저장하고 산정 설정으로</button></form>}
+      <a className="report-pdf-link" href={`/api/projects/${project.id}/report-pdf`}>PDF 결과물 다운로드</a>
+      {project.status === "completed" ? <Link className="report-return-link" href="/">산정 설정으로</Link> : <form action={completeProjectAndReturn} className="report-return"><input name="projectId" type="hidden" value={project.id} /><button type="submit">확정 결과 저장하고 산정 설정으로</button></form>}
     </aside></div>
   </section></main>;
 }

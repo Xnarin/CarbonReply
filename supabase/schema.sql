@@ -34,6 +34,62 @@ create table if not exists public.monthly_activity (
 );
 create index if not exists monthly_activity_project_id_month_idx on public.monthly_activity (project_id, month);
 
+create table if not exists public.activity_revisions (
+  id uuid primary key default gen_random_uuid(),
+  monthly_activity_id uuid not null references public.monthly_activity(id) on delete cascade,
+  project_id uuid not null references public.projects(id) on delete cascade,
+  month date not null,
+  previous_kwh numeric(14, 3) not null check (previous_kwh >= 0),
+  new_kwh numeric(14, 3) not null check (new_kwh >= 0),
+  previous_confirmed boolean not null,
+  new_confirmed boolean not null,
+  change_type text not null check (change_type in ('confirmed', 'corrected')),
+  created_at timestamptz not null default now()
+);
+create index if not exists activity_revisions_project_id_created_at_idx
+  on public.activity_revisions (project_id, created_at desc);
+create index if not exists activity_revisions_monthly_activity_id_idx
+  on public.activity_revisions (monthly_activity_id);
+
+create or replace function public.log_monthly_activity_revision()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.activity_revisions (
+    monthly_activity_id,
+    project_id,
+    month,
+    previous_kwh,
+    new_kwh,
+    previous_confirmed,
+    new_confirmed,
+    change_type
+  ) values (
+    new.id,
+    new.project_id,
+    new.month,
+    old.kwh,
+    new.kwh,
+    old.confirmed,
+    new.confirmed,
+    case when old.kwh is distinct from new.kwh then 'corrected' else 'confirmed' end
+  );
+
+  return new;
+end;
+$$;
+revoke all on function public.log_monthly_activity_revision() from public, anon, authenticated;
+
+drop trigger if exists monthly_activity_revision_trigger on public.monthly_activity;
+create trigger monthly_activity_revision_trigger
+after update of kwh, confirmed on public.monthly_activity
+for each row
+when (old.kwh is distinct from new.kwh or old.confirmed is distinct from new.confirmed)
+execute function public.log_monthly_activity_revision();
+
 create table if not exists public.issues (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references public.projects(id) on delete cascade,
@@ -59,6 +115,9 @@ create table if not exists public.reports (
 alter table public.projects enable row level security;
 alter table public.documents enable row level security;
 alter table public.monthly_activity enable row level security;
+alter table public.activity_revisions enable row level security;
+grant select on public.activity_revisions to authenticated;
+grant select, insert, update, delete on public.activity_revisions to service_role;
 alter table public.issues enable row level security;
 alter table public.reports enable row level security;
 
@@ -86,5 +145,6 @@ create policy "company owner can read company" on public.companies for select to
 create policy "company members can manage projects" on public.projects for all to authenticated using (exists (select 1 from public.companies c where c.id = projects.company_id and c.auth_user_id = (select auth.uid()))) with check (exists (select 1 from public.companies c where c.id = projects.company_id and c.auth_user_id = (select auth.uid())));
 create policy "company members can manage documents" on public.documents for all to authenticated using (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = documents.project_id and c.auth_user_id = (select auth.uid()))) with check (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = documents.project_id and c.auth_user_id = (select auth.uid())));
 create policy "company members can manage monthly activity" on public.monthly_activity for all to authenticated using (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = monthly_activity.project_id and c.auth_user_id = (select auth.uid()))) with check (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = monthly_activity.project_id and c.auth_user_id = (select auth.uid())));
+create policy "company members can read activity revisions" on public.activity_revisions for select to authenticated using (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = activity_revisions.project_id and c.auth_user_id = (select auth.uid())));
 create policy "company members can manage issues" on public.issues for all to authenticated using (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = issues.project_id and c.auth_user_id = (select auth.uid()))) with check (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id and c.auth_user_id = (select auth.uid())));
 create policy "company members can manage reports" on public.reports for all to authenticated using (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id where p.id = reports.project_id and c.auth_user_id = (select auth.uid()))) with check (exists (select 1 from public.projects p join public.companies c on c.id = p.company_id and c.auth_user_id = (select auth.uid())));
