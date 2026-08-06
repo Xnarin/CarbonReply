@@ -1,7 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import { initialAuthState, registerCompany, signInCompany } from "@/app/actions/auth";
+import { registerCompany, signInCompany } from "@/app/actions/auth";
+
+const initialAuthState: { error?: string; emailSent?: string; companyName?: string } = {};
 
 function AuthHeader({ mode }: { mode: "login" | "signup" }) {
   return <header className="access-header"><a className="access-brand" href="/login"><span>CARBONREPLY</span><b>탄소길잡이</b></a><div className="access-steps"><span className={mode === "login" ? "is-current" : ""}><i>01</i> 로그인</span><em /><span className={mode === "signup" ? "is-current" : ""}><i>02</i> 계정 발급</span></div><p>SCOPE 2 · ELECTRICITY DATA</p></header>;

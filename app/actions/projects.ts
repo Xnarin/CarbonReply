@@ -5,7 +5,6 @@ import { requireCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export type ProjectFormState = { error?: string };
-export const initialProjectState: ProjectFormState = {};
 
 export async function createProject(_: ProjectFormState, formData: FormData): Promise<ProjectFormState> {
   const targetYear = Number(formData.get("targetYear"));

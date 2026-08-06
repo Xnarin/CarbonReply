@@ -2,7 +2,9 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { createProject, initialProjectState } from "@/app/actions/projects";
+import { createProject } from "@/app/actions/projects";
+
+const initialProjectState: { error?: string } = {};
 
 const months = Array.from({ length: 12 }, (_, index) => index + 1);
 

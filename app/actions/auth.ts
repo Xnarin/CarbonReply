@@ -7,7 +7,6 @@ import { createSupabaseAuthClient } from "@/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 type AuthState = { error?: string; emailSent?: string; companyName?: string };
-export const initialAuthState: AuthState = {};
 
 function companyNameFrom(formData: FormData) { return String(formData.get("companyName") ?? "").trim().replace(/\s+/g, " "); }
 function emailFrom(formData: FormData) { return String(formData.get("email") ?? "").trim().toLowerCase(); }
