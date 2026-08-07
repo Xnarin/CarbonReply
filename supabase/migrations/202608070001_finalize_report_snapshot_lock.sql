@@ -150,7 +150,8 @@ begin
     calculated_at = excluded.calculated_at
   returning * into saved_report;
 
-  delete from public.report_activity_snapshots where report_id = saved_report.id;
+  delete from public.report_activity_snapshots as snapshots
+  where snapshots.report_id = saved_report.id;
   insert into public.report_activity_snapshots (
     report_id, project_id, month, kwh, emissions_kg, source, created_at
   )
