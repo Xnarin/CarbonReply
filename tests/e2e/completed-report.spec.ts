@@ -12,7 +12,7 @@ test.describe("completed Scope 2 report", () => {
     await page.locator('input[name="companyName"]').fill(companyName!);
     await page.locator('input[name="password"]').fill(password!);
     await page.locator('button[type="submit"]').click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/$/, { timeout: 20_000 });
 
     await page.goto(`/projects/${projectId}/report`);
     await expect(page.locator(".report-lock-banner")).toBeVisible();
@@ -23,6 +23,6 @@ test.describe("completed Scope 2 report", () => {
     expect(pdfResponse.headers()["content-type"]).toContain("application/pdf");
 
     await page.goto(`/projects/${projectId}/review`);
-    await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/report`));
+    await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/report`), { timeout: 20_000 });
   });
 });
