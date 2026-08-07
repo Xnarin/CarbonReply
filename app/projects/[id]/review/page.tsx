@@ -6,6 +6,7 @@ import { requireCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { calculateElectricityEmissionsKg, getElectricityFactor } from "@/lib/emission-factor";
 import { analyzeMonthlyUsage, formatMonthNumbers } from "@/lib/bill-validation";
+import { getFinalizationReadiness } from "@/lib/workflow-validation";
 
 export const dynamic = "force-dynamic";
 type ReviewPageProps = { params: Promise<{ id: string }> };
@@ -45,11 +46,12 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const totalKg = calculateElectricityEmissionsKg(totalKwh, project.target_year);
   const confirmedCount = rows.filter((row) => row.confirmed).length;
   const validation = analyzeMonthlyUsage(rows, project.target_year);
+  const finalization = getFinalizationReadiness(rows, project.target_year);
   const outlierMonths = new Set(validation.outlierMonths);
   const zeroUsageMonths = new Set(validation.zeroUsageMonths);
   const warningMonths = new Set([...validation.invalidMonths, ...validation.outlierMonths, ...validation.zeroUsageMonths]);
   const hasUnconfirmedWarning = rows.some((row) => warningMonths.has(row.month) && !row.confirmed);
-  const canCreateReport = rows.length > 0 && confirmedCount === rows.length && validation.invalidMonths.length === 0;
+  const canCreateReport = finalization.canFinalize;
 
   return <main className="review-page"><section className="review-panel">
     <ProjectProgress activeStep={3} projectId={project.id} />

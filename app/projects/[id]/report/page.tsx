@@ -6,6 +6,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { completeProjectAndReturn } from "@/app/actions/review";
 import { ELECTRICITY_FACTOR_SOURCE_URL, getElectricityFactor, type ElectricityFactor } from "@/lib/emission-factor";
 import { analyzeMonthlyUsage, formatMonthNumbers } from "@/lib/bill-validation";
+import { getFinalizationReadiness } from "@/lib/workflow-validation";
 
 export const dynamic = "force-dynamic";
 type ReportPageProps = {
@@ -49,7 +50,7 @@ export default async function ReportPage({ params, searchParams }: ReportPagePro
 
   const liveRows = (activities ?? []) as ActivityRow[];
   const isFinalized = project.status === "completed";
-  if (!isFinalized && (liveRows.length === 0 || liveRows.some((row) => !row.confirmed))) redirect(`/projects/${id}/review`);
+  if (!isFinalized && !getFinalizationReadiness(liveRows, project.target_year).canFinalize) redirect(`/projects/${id}/review`);
   const report = savedReport as SavedReport | null;
   const snapshotRows = (snapshots ?? []) as SnapshotRow[];
   if (isFinalized && (!report || snapshotRows.length === 0)) notFound();

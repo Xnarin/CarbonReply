@@ -6,6 +6,7 @@ import { getCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getElectricityFactor } from "@/lib/emission-factor";
 import { analyzeMonthlyUsage, formatMonthNumbers, isValidUsageKwh } from "@/lib/bill-validation";
+import { getFinalizationReadiness } from "@/lib/workflow-validation";
 
 function describeValidation(activities: Array<{ month: string; kwh: number; confirmed: boolean }>, targetYear: number) {
   const validation = analyzeMonthlyUsage(activities, targetYear);
@@ -65,8 +66,9 @@ export async function completeProjectAndReturn(formData: FormData) {
   const { data: activities } = await supabase.from("monthly_activity").select("month, kwh, confirmed").eq("project_id", projectId);
   if (!activities?.length || activities.some((activity) => !activity.confirmed)) return;
 
-  const validation = analyzeMonthlyUsage(activities, project.target_year);
-  if (validation.invalidMonths.length > 0) return;
+  const readiness = getFinalizationReadiness(activities, project.target_year);
+  if (!readiness.canFinalize) return;
+  const validation = readiness.validation;
 
   const factor = getElectricityFactor(project.target_year);
   const { error } = await supabase.rpc("finalize_project_report", {
