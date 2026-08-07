@@ -51,8 +51,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return Response.json({ error: "Supabase 서버 설정이 필요합니다." }, { status: 503 });
   }
 
-  const { data: project } = await supabase.from("projects").select("id").eq("id", projectId).eq("company_id", company.id).maybeSingle();
+  const { data: project } = await supabase.from("projects").select("id, status").eq("id", projectId).eq("company_id", company.id).maybeSingle();
   if (!project) return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
+  if (project.status === "completed") return Response.json({ error: "확정된 결과에는 고지서를 추가할 수 없습니다." }, { status: 409 });
 
   const documents = files.map((file) => ({
     project_id: projectId,

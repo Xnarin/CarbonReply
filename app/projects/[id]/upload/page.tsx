@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { DocumentUpload } from "@/components/document-upload";
 import { UploadedDocuments, type UploadedDocument } from "@/components/uploaded-documents";
 import { ProjectProgress } from "@/components/project-progress";
@@ -24,7 +24,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   }
 
   const [{ data: project }, { data: documents }] = await Promise.all([
-    supabase.from("projects").select("id, company_name, target_year").eq("id", id).eq("company_id", company.id).maybeSingle(),
+    supabase.from("projects").select("id, company_name, target_year, status").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase
       .from("documents")
       .select("id, file_name, size_bytes, parse_status, created_at")
@@ -33,6 +33,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   ]);
 
   if (!project) notFound();
+  if (project.status === "completed") redirect(`/projects/${id}/report`);
   const rows = (documents ?? []) as UploadedDocument[];
 
   return (

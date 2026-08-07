@@ -4,8 +4,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import { calculateElectricityEmissionsKg, getElectricityFactor } from "@/lib/emission-factor";
-import { analyzeMonthlyUsage, isValidUsageKwh } from "@/lib/bill-validation";
+import { getElectricityFactor } from "@/lib/emission-factor";
+import { analyzeMonthlyUsage, formatMonthNumbers, isValidUsageKwh } from "@/lib/bill-validation";
+
+function describeValidation(activities: Array<{ month: string; kwh: number; confirmed: boolean }>, targetYear: number) {
+  const validation = analyzeMonthlyUsage(activities, targetYear);
+  if (validation.grade === "A") return "12개월 자료 완비 · 통계적 주의값 없음";
+  if (validation.grade === "B") return `누락 ${validation.missingMonths.length}개월 (${formatMonthNumbers(validation.missingMonths)})`;
+  return `주의 사용량 ${validation.outlierMonths.length + validation.zeroUsageMonths.length}건 원본 대조 완료`;
+}
 
 export async function confirmMonthlyUsage(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
@@ -16,8 +23,8 @@ export async function confirmMonthlyUsage(formData: FormData) {
   const company = await getCurrentCompany();
   if (!company) return { ok: false };
   const supabase = createSupabaseAdminClient();
-  const { data: project } = await supabase.from("projects").select("id, target_year").eq("id", projectId).eq("company_id", company.id).maybeSingle();
-  if (!project || !month.startsWith(`${project.target_year}-`)) return { ok: false };
+  const { data: project } = await supabase.from("projects").select("id, target_year, status").eq("id", projectId).eq("company_id", company.id).maybeSingle();
+  if (!project || project.status === "completed" || !month.startsWith(`${project.target_year}-`)) return { ok: false };
 
   const { error } = await supabase.from("monthly_activity").update({ kwh, confirmed: true }).eq("project_id", projectId).eq("month", month);
   if (error) return { ok: false };
@@ -31,8 +38,8 @@ export async function confirmAllMonthlyUsage(formData: FormData) {
   const company = await getCurrentCompany();
   if (!company) return { ok: false };
   const supabase = createSupabaseAdminClient();
-  const { data: project } = await supabase.from("projects").select("id, target_year").eq("id", projectId).eq("company_id", company.id).maybeSingle();
-  if (!project) return { ok: false };
+  const { data: project } = await supabase.from("projects").select("id, target_year, status").eq("id", projectId).eq("company_id", company.id).maybeSingle();
+  if (!project || project.status === "completed") return { ok: false };
 
   const { data: activities } = await supabase.from("monthly_activity").select("month, kwh, confirmed").eq("project_id", projectId);
   if (!activities?.length) return { ok: false };
@@ -52,19 +59,30 @@ export async function completeProjectAndReturn(formData: FormData) {
   const company = await getCurrentCompany();
   if (!company) return;
   const supabase = createSupabaseAdminClient();
-  const { data: project } = await supabase.from("projects").select("id, target_year").eq("id", projectId).eq("company_id", company.id).maybeSingle();
+  const { data: project } = await supabase.from("projects").select("id, target_year, status").eq("id", projectId).eq("company_id", company.id).maybeSingle();
   if (!project) return;
+  if (project.status === "completed") redirect("/");
   const { data: activities } = await supabase.from("monthly_activity").select("month, kwh, confirmed").eq("project_id", projectId);
   if (!activities?.length || activities.some((activity) => !activity.confirmed)) return;
 
   const validation = analyzeMonthlyUsage(activities, project.target_year);
   if (validation.invalidMonths.length > 0) return;
 
-  const totalKwh = activities.reduce((sum, activity) => sum + Number(activity.kwh), 0);
   const factor = getElectricityFactor(project.target_year);
-  const totalTco2e = calculateElectricityEmissionsKg(totalKwh, project.target_year) / 1000;
-  await supabase.from("reports").upsert({ project_id: projectId, total_kwh: totalKwh, total_tco2e: totalTco2e, grade: validation.grade, factor_value: factor.value, factor_version: factor.version, calculated_at: new Date().toISOString() }, { onConflict: "project_id" });
-  await supabase.from("projects").update({ status: "completed" }).eq("id", projectId).eq("company_id", company.id);
+  const { error } = await supabase.rpc("finalize_project_report", {
+    p_project_id: projectId,
+    p_company_id: company.id,
+    p_grade: validation.grade,
+    p_factor_value: factor.value,
+    p_factor_year: factor.factorYear,
+    p_factor_version: factor.version,
+    p_validation_notes: describeValidation(activities, project.target_year),
+  });
+  if (error) {
+    console.error("[report:finalize] Finalization failed", { projectId, error: error.message });
+    redirect(`/projects/${projectId}/report?finalizeError=1`);
+  }
   revalidatePath("/");
+  revalidatePath(`/projects/${projectId}/report`);
   redirect("/");
 }

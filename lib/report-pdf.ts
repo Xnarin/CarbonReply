@@ -5,6 +5,8 @@ export type ReportPdfData = {
   companyName: string;
   targetYear: number;
   generatedAt: Date;
+  finalizedAt?: Date;
+  reportVersion?: number;
   totalKwh: number;
   totalKg: number;
   grade: "A" | "B" | "C";
@@ -68,9 +70,9 @@ export async function createReportPdf(data: ReportPdfData, fontBytes: Uint8Array
   page.drawRectangle({ x: 0, y: 0, width: PAGE_WIDTH, height: PAGE_HEIGHT, color: PAPER });
   drawText(page, font, "CARBONREPLY", margin, 796, 8, BLUE);
   drawText(page, font, "탄소길잡이", margin, 778, 15);
-  drawText(page, font, "SCOPE 2 · ELECTRICITY REPORT", 365, 793, 8, BLUE);
+  drawText(page, font, data.reportVersion ? `SCOPE 2 · FINAL REPORT v${data.reportVersion}` : "SCOPE 2 · PREVIEW REPORT", 365, 793, 8, BLUE);
   drawText(page, font, `${data.targetYear}년 전력 사용 결과`, margin, 737, 24);
-  drawText(page, font, `${data.companyName} · 확정된 ${data.rows.length}개월 사용량 기준`, margin, 716, 10, MUTED);
+  drawText(page, font, `${data.companyName} · ${data.reportVersion ? "확정 스냅샷" : "확정 전 미리보기"} · ${data.rows.length}개월 사용량 기준`, margin, 716, 10, MUTED);
   drawRule(page, margin, 696, PAGE_WIDTH - margin, BLUE, 1.4);
 
   page.drawRectangle({ x: margin, y: 573, width: contentWidth, height: 102, color: BLUE });
@@ -125,8 +127,8 @@ export async function createReportPdf(data: ReportPdfData, fontBytes: Uint8Array
   }
 
   drawRule(page, margin, 67, PAGE_WIDTH - margin);
-  const issuedAt = new Intl.DateTimeFormat("ko-KR", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Seoul" }).format(data.generatedAt).replace(/(오전|오후) (\d+):(\d+)/, "$1 $2시 $3분");
-  drawText(page, font, `생성일시 ${issuedAt}`, margin, 48, 7, MUTED);
+  const issuedAt = new Intl.DateTimeFormat("ko-KR", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Seoul" }).format(data.finalizedAt ?? data.generatedAt).replace(/(오전|오후) (\d+):(\d+)/, "$1 $2시 $3분");
+  drawText(page, font, `${data.finalizedAt ? "확정일시" : "생성일시"} ${issuedAt}`, margin, 48, 7, MUTED);
   const pageNumber = "1 / 1";
   drawText(page, font, pageNumber, PAGE_WIDTH - margin - font.widthOfTextAtSize(pageNumber, 7), 48, 7, MUTED);
 

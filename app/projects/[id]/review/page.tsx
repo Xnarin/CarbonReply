@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { OriginalPdfDialog } from "@/components/original-pdf-dialog";
 import { ProjectProgress } from "@/components/project-progress";
 import { ConfirmationOptimisticProvider, ConfirmAllUsageForm, UsageConfirmationCells } from "@/components/usage-confirmation";
@@ -30,12 +30,13 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const company = await requireCurrentCompany();
   const supabase = createSupabaseAdminClient();
   const [{ data: project }, { data: activities }, { data: documents }, { data: revisions }] = await Promise.all([
-    supabase.from("projects").select("id, company_name, target_year").eq("id", id).eq("company_id", company.id).maybeSingle(),
+    supabase.from("projects").select("id, company_name, target_year, status").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase.from("monthly_activity").select("month, kwh, confirmed, source").eq("project_id", id).order("month"),
     supabase.from("documents").select("id, file_name, parsed_month, parsed_kwh").eq("project_id", id).eq("parse_status", "completed"),
     supabase.from("activity_revisions").select("id, month, previous_kwh, new_kwh, previous_confirmed, new_confirmed, change_type, created_at").eq("project_id", id).order("created_at", { ascending: false }).limit(30),
   ]);
   if (!project) notFound();
+  if (project.status === "completed") redirect(`/projects/${id}/report`);
   const rows = (activities ?? []) as ActivityRow[];
   const revisionRows = (revisions ?? []) as ActivityRevision[];
   const evidenceByMonth = new Map(((documents ?? []) as EvidenceDocument[]).map((document) => [document.parsed_month, document]));

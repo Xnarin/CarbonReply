@@ -13,11 +13,12 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, target_year")
+    .select("id, target_year, status")
     .eq("id", projectId)
     .eq("company_id", company.id)
     .maybeSingle();
   if (!project) return Response.json({ error: "프로젝트를 찾을 수 없습니다." }, { status: 404 });
+  if (project.status === "completed") return Response.json({ error: "확정된 결과는 다시 추출할 수 없습니다." }, { status: 409 });
 
   const { data: document, error } = await supabase
     .from("documents")
