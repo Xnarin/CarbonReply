@@ -50,6 +50,7 @@ export function UsageConfirmationCells({ confirmed, emissionsKg, kwh, month, mon
   const [localConfirmed, setLocalConfirmed] = useState(confirmed);
   const [failed, setFailed] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const hasValidBillUsage = kwh > 0;
   const displayConfirmed = confirmed || localConfirmed || allOptimistic;
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -68,7 +69,7 @@ export function UsageConfirmationCells({ confirmed, emissionsKg, kwh, month, mon
   }
 
   return <>
-    <td><form className="usage-form" onSubmit={submit}><input name="projectId" type="hidden" value={projectId} /><input name="month" type="hidden" value={month} /><input aria-label={`${monthLabel} 전기 사용량`} defaultValue={kwh} max="100000000" min="0" name="kwh" step="0.01" type="number" /><span>kWh</span><button className={`confirm-usage-button ${displayConfirmed ? "is-optimistic" : ""}`} disabled={isPending || allOptimistic} type="submit">{isPending ? "확정됨 · 저장 중" : confirmed ? "수정값 확정" : displayConfirmed ? "확정됨" : "이 값 확정"}</button></form></td>
+    <td><form className="usage-form" onSubmit={submit}><input name="projectId" type="hidden" value={projectId} /><input name="month" type="hidden" value={month} /><input aria-label={`${monthLabel} 전기 사용량`} defaultValue={kwh} max="100000000" min="0.01" name="kwh" step="0.01" type="number" /><span>kWh</span><button className={`confirm-usage-button ${displayConfirmed ? "is-optimistic" : ""}`} disabled={!hasValidBillUsage || isPending || allOptimistic} title={!hasValidBillUsage ? "0 kWh는 전기요금 고지서의 확정값으로 사용할 수 없습니다." : undefined} type="submit">{!hasValidBillUsage ? "고지서 다시 확인" : isPending ? "확정됨 · 저장 중" : confirmed ? "수정값 확정" : displayConfirmed ? "확정됨" : "이 값 확정"}</button></form></td>
     <td>{emissionsKg.toFixed(1)} kgCO₂e</td>
     <td><span className={`review-status ${displayConfirmed ? "is-confirmed" : ""} ${isPending || allOptimistic ? "is-saving" : ""}`}>{isPending || allOptimistic ? "확정됨 · 저장 중" : displayConfirmed ? "확정됨" : "확인 필요"}</span>{failed ? <small className="confirmation-error" role="alert">저장 실패</small> : null}</td>
   </>;

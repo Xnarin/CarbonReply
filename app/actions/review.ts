@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getElectricityFactor } from "@/lib/emission-factor";
-import { analyzeMonthlyUsage, formatMonthNumbers, isValidUsageKwh } from "@/lib/bill-validation";
+import { analyzeMonthlyUsage, formatMonthNumbers, isValidBillUsageKwh } from "@/lib/bill-validation";
 import { getFinalizationReadiness } from "@/lib/workflow-validation";
 
 function describeValidation(activities: Array<{ month: string; kwh: number; confirmed: boolean }>, targetYear: number) {
@@ -19,7 +19,7 @@ export async function confirmMonthlyUsage(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
   const month = String(formData.get("month") ?? "");
   const kwh = Number(formData.get("kwh"));
-  if (!projectId || !/^\d{4}-\d{2}-01$/.test(month) || !isValidUsageKwh(kwh)) return { ok: false };
+  if (!projectId || !/^\d{4}-\d{2}-01$/.test(month) || !isValidBillUsageKwh(kwh)) return { ok: false };
 
   const company = await getCurrentCompany();
   if (!company) return { ok: false };

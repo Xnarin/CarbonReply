@@ -29,6 +29,10 @@ export function isValidUsageKwh(kwh: number) {
   return Number.isFinite(kwh) && kwh >= 0 && kwh <= MAX_MONTHLY_USAGE_KWH;
 }
 
+export function isValidBillUsageKwh(kwh: number) {
+  return Number.isFinite(kwh) && kwh > 0 && kwh <= MAX_MONTHLY_USAGE_KWH;
+}
+
 export function analyzeMonthlyUsage(rows: MonthlyUsage[], targetYear: number): UsageValidation {
   const expectedMonths = Array.from({ length: 12 }, (_, index) => `${targetYear}-${String(index + 1).padStart(2, "0")}-01`);
   const actualMonths = new Set(rows.map((row) => row.month));

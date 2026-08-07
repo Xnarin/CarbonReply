@@ -12,6 +12,12 @@ describe("extraction quality center", () => {
     expect(result.description).toContain("같은 청구월");
   });
 
+  it("classifies a non-bill document as a manual action item", () => {
+    const result = getExtractionQuality({ parse_status: "failed", parse_error_code: "not_electricity_bill" });
+    expect(result.kind).toBe("manual");
+    expect(result.description).toContain("전기요금 고지서가 아닌");
+  });
+
   it("handles unknown extraction failure without hiding the next step", () => {
     const result = getExtractionQuality({ parse_status: "failed", parse_error_code: null });
     expect(result).toMatchObject({ kind: "manual", label: "직접 보정 필요" });

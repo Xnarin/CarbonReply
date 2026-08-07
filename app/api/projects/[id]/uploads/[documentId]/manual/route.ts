@@ -1,5 +1,5 @@
 import { getCurrentCompany } from "@/lib/current-company";
-import { isValidUsageKwh } from "@/lib/bill-validation";
+import { isValidBillUsageKwh } from "@/lib/bill-validation";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -13,7 +13,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try { body = await request.json(); } catch { return Response.json({ error: "보정값 형식이 올바르지 않습니다." }, { status: 400 }); }
   const month = typeof body.month === "string" ? body.month : "";
   const kwh = Number(body.kwh);
-  if (!/^\d{4}-\d{2}$/.test(month) || !isValidUsageKwh(kwh)) {
+  if (!/^\d{4}-\d{2}$/.test(month) || !isValidBillUsageKwh(kwh)) {
     return Response.json({ error: "청구월과 0 이상 사용량(kWh)을 입력하세요." }, { status: 400 });
   }
 

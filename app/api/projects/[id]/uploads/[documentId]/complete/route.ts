@@ -1,7 +1,7 @@
 import { getCurrentCompany } from "@/lib/current-company";
 import { extractElectricityBill } from "@/lib/gemini";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import { isValidPdfHeader, isValidUsageKwh } from "@/lib/bill-validation";
+import { isValidBillUsageKwh, isValidPdfHeader } from "@/lib/bill-validation";
 
 export const runtime = "nodejs";
 
@@ -38,6 +38,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       return Response.json({ error: "PDF 확장자와 실제 파일 형식이 일치하지 않습니다.", code: "invalid_pdf" }, { status: 422 });
     }
     const extracted = await extractElectricityBill(pdf);
+    if (!extracted.isElectricityBill) {
+      await supabase.from("documents").update({ parse_status: "failed", parse_error_code: "not_electricity_bill" }).eq("id", documentId).eq("project_id", projectId);
+      return Response.json({ error: "전기요금 고지서가 아니거나 사용량(kWh) 항목을 찾지 못했습니다. 한전 전자고지서를 올려 주세요.", code: "not_electricity_bill" }, { status: 422 });
+    }
     if (extracted.billingYear !== project.target_year) {
       await supabase.from("documents").update({ parse_status: "failed", parse_error_code: "year_mismatch", parsed_kwh: extracted.usageKwh }).eq("id", documentId).eq("project_id", projectId);
       return Response.json({
@@ -47,7 +51,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
         expectedYear: project.target_year,
       }, { status: 409 });
     }
-    if (!isValidUsageKwh(extracted.usageKwh)) {
+    if (!isValidBillUsageKwh(extracted.usageKwh)) {
       await supabase.from("documents").update({ parse_status: "failed", parse_error_code: "invalid_usage" }).eq("id", documentId).eq("project_id", projectId);
       return Response.json({ error: "추출된 사용량이 허용 범위를 벗어났습니다. 원본을 확인해 주세요.", code: "invalid_usage" }, { status: 422 });
     }

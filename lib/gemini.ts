@@ -4,6 +4,7 @@ const MODEL = "gemini-2.5-flash";
 const MAX_INLINE_PDF_BYTES = 15 * 1024 * 1024;
 
 export type BillExtraction = {
+  isElectricityBill: boolean;
   billingYear: number;
   billingMonth: number;
   usageKwh: number;
@@ -12,13 +13,16 @@ export type BillExtraction = {
 function asExtraction(value: unknown): BillExtraction | null {
   if (!value || typeof value !== "object") return null;
   const record = value as Record<string, unknown>;
+  const isElectricityBill = record.isElectricityBill;
   const billingYear = Number(record.billingYear);
   const billingMonth = Number(record.billingMonth);
   const usageKwh = Number(record.usageKwh);
+  if (typeof isElectricityBill !== "boolean") return null;
+  if (!isElectricityBill) return { isElectricityBill, billingYear: 0, billingMonth: 0, usageKwh: 0 };
   if (!Number.isInteger(billingYear) || billingYear < 2020 || billingYear > 2100) return null;
   if (!Number.isInteger(billingMonth) || billingMonth < 1 || billingMonth > 12) return null;
   if (!Number.isFinite(usageKwh)) return null;
-  return { billingYear, billingMonth, usageKwh };
+  return { isElectricityBill, billingYear, billingMonth, usageKwh };
 }
 
 export async function extractElectricityBill(pdf: ArrayBuffer): Promise<BillExtraction> {
@@ -38,7 +42,7 @@ export async function extractElectricityBill(pdf: ArrayBuffer): Promise<BillExtr
           role: "user",
           parts: [
             { inlineData: { mimeType: "application/pdf", data: Buffer.from(pdf).toString("base64") } },
-            { text: "Read this Korean electricity bill. Return only JSON with billingYear (integer), billingMonth (1-12), and usageKwh (number). Use the billed electricity consumption in kWh, not the amount charged. If a field is unclear, do not guess." },
+            { text: "First decide whether this PDF is an electricity bill or electricity statement. It is an electricity bill only when the document clearly shows billed electricity consumption in kWh and a billing period/month. Documents such as facility inspection reports, estimates, contracts, receipts, or documents without billed kWh are not electricity bills. Return only JSON with isElectricityBill (boolean), billingYear (integer), billingMonth (1-12), and usageKwh (number). If isElectricityBill is false, set billingYear, billingMonth, and usageKwh to 0. If it is true, use the billed electricity consumption in kWh, not the amount charged. Never guess missing fields." },
           ],
         }],
         generationConfig: {
@@ -46,11 +50,12 @@ export async function extractElectricityBill(pdf: ArrayBuffer): Promise<BillExtr
           responseSchema: {
             type: "OBJECT",
             properties: {
+              isElectricityBill: { type: "BOOLEAN" },
               billingYear: { type: "INTEGER" },
               billingMonth: { type: "INTEGER" },
               usageKwh: { type: "NUMBER" },
             },
-            required: ["billingYear", "billingMonth", "usageKwh"],
+            required: ["isElectricityBill", "billingYear", "billingMonth", "usageKwh"],
           },
         },
       }),

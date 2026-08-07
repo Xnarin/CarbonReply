@@ -126,7 +126,7 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
     {correctionDocument ? <form action={submitCorrection} className="manual-correction-panel">
       <div><p>직접 보정</p><h3>{correctionDocument.file_name}</h3><span>원본 고지서를 보고 청구월과 전기 사용량을 입력하세요. 저장 후 검토 화면에서 최종 확정합니다.</span></div>
       <label>청구월<input defaultValue={correctionDocument.parsed_month?.slice(0, 7) ?? ""} name="month" required type="month" /></label>
-      <label>전기 사용량(kWh)<input defaultValue={correctionDocument.parsed_kwh ?? ""} min="0" name="kwh" required step="0.01" type="number" /></label>
+      <label>전기 사용량(kWh)<input defaultValue={correctionDocument.parsed_kwh ?? ""} min="0.01" name="kwh" required step="0.01" type="number" /></label>
       <div><button disabled={isWorking} type="submit">{isWorking ? "저장 중" : "보정값 저장"}</button><button disabled={isWorking} onClick={() => setCorrectionDocument(null)} type="button">취소</button></div>
     </form> : null}
   </section>;
