@@ -16,6 +16,7 @@ create table if not exists public.documents (
   size_bytes bigint not null check (size_bytes > 0 and size_bytes <= 20971520),
   parsed_month date,
   parsed_kwh numeric(14, 3),
+  parse_error_code text,
   parse_status text not null default 'uploading' check (parse_status in ('uploading', 'pending', 'completed', 'failed')),
   uploaded_at timestamptz,
   created_at timestamptz not null default now()

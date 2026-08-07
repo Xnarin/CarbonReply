@@ -27,7 +27,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
     supabase.from("projects").select("id, company_name, target_year, status").eq("id", id).eq("company_id", company.id).maybeSingle(),
     supabase
       .from("documents")
-      .select("id, file_name, size_bytes, parse_status, created_at")
+      .select("id, file_name, size_bytes, parse_status, parse_error_code, parsed_month, parsed_kwh, created_at")
       .eq("project_id", id)
       .order("created_at", { ascending: false }),
   ]);
