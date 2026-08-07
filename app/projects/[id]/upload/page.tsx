@@ -35,6 +35,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
   if (!project) notFound();
   if (project.status === "completed") redirect(`/projects/${id}/report`);
   const rows = (documents ?? []) as UploadedDocument[];
+  const canOpenReview = rows.some((row) => row.parse_status === "completed" && Boolean(row.parsed_month) && Number(row.parsed_kwh) > 0);
 
   return (
     <main className="upload-page">
@@ -53,8 +54,8 @@ export default async function UploadPage({ params }: UploadPageProps) {
         <UploadedDocuments documents={rows} projectId={project.id} />
 
         <footer className="upload-footer">
-          <span>{rows.some((row) => row.parse_status === "completed") ? "추출이 끝난 고지서를 검토할 수 있습니다." : "업로드 목록을 확인한 뒤 사용량 추출을 시작해 주세요."}</span>
-          {rows.some((row) => row.parse_status === "completed") ? <a className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</a> : <button disabled type="button">추출 결과 확인하기</button>}
+          <span>{canOpenReview ? "정상 추출된 고지서를 검토할 수 있습니다." : "전기요금 고지서를 정상 추출한 뒤 다음 단계로 진행할 수 있습니다."}</span>
+          {canOpenReview ? <a className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</a> : <button disabled type="button">추출 결과 확인하기</button>}
         </footer>
       </section>
     </main>

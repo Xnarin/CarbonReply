@@ -39,6 +39,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   if (!project) notFound();
   if (project.status === "completed") redirect(`/projects/${id}/report`);
   const rows = (activities ?? []) as ActivityRow[];
+  if (!rows.some((row) => Number(row.kwh) > 0)) redirect(`/projects/${id}/upload`);
   const revisionRows = (revisions ?? []) as ActivityRevision[];
   const evidenceByMonth = new Map(((documents ?? []) as EvidenceDocument[]).map((document) => [document.parsed_month, document]));
   const electricityFactor = getElectricityFactor(project.target_year);
