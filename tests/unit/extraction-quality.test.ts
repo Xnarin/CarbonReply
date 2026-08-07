@@ -15,7 +15,8 @@ describe("extraction quality center", () => {
   it("classifies a non-bill document as a manual action item", () => {
     const result = getExtractionQuality({ parse_status: "failed", parse_error_code: "not_electricity_bill" });
     expect(result.kind).toBe("manual");
-    expect(result.description).toContain("전기요금 고지서가 아닌");
+    expect(result.nextAction).toBe("replace");
+    expect(result.label).toBe("고지서 교체 필요");
   });
 
   it("handles unknown extraction failure without hiding the next step", () => {

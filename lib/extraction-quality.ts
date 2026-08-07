@@ -7,16 +7,21 @@ export type ExtractionDocument = {
 
 export type ExtractionQuality = {
   kind: "pending" | "review" | "manual";
+  nextAction: "manual_correction" | "replace" | null;
   label: string;
   description: string;
 };
 
 export function getExtractionQuality(document: ExtractionDocument): ExtractionQuality {
   if (document.parse_status === "uploading" || document.parse_status === "pending") {
-    return { kind: "pending", label: "추출 대기", description: "업로드 확인 후 사용량을 추출합니다." };
+    return { kind: "pending", nextAction: null, label: "추출 대기", description: "업로드 확인 후 사용량을 추출합니다." };
   }
   if (document.parse_status === "completed") {
-    return { kind: "review", label: "원본 확인", description: "사용량과 청구월을 원본 고지서와 대조한 뒤 확정하세요." };
+    return { kind: "review", nextAction: null, label: "원본 확인", description: "사용량과 청구월을 원본 고지서와 대조한 뒤 확정하세요." };
+  }
+
+  if (document.parse_error_code === "not_electricity_bill") {
+    return { kind: "manual", nextAction: "replace", label: "고지서 교체 필요", description: "전기요금 고지서가 아닌 문서입니다. 이 파일을 삭제하고 한전 전자고지서를 올려 주세요." };
   }
 
   const messages: Record<Exclude<ParseErrorCode, null>, string> = {
@@ -29,6 +34,7 @@ export function getExtractionQuality(document: ExtractionDocument): ExtractionQu
   };
   return {
     kind: "manual",
+    nextAction: ["invalid_pdf", "year_mismatch", "duplicate_month"].includes(document.parse_error_code ?? "extraction_failed") ? "replace" : "manual_correction",
     label: "직접 보정 필요",
     description: messages[document.parse_error_code ?? "extraction_failed"],
   };

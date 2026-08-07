@@ -30,10 +30,12 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
   const [correctionDocument, setCorrectionDocument] = useState<UploadedDocument | null>(null);
   const queuedDocuments = documents.filter((document) => document.parse_status === "uploading");
   const qualityCounts = documents.reduce((counts, document) => {
-    const kind = getExtractionQuality(document).kind;
-    counts[kind] += 1;
+    const quality = getExtractionQuality(document);
+    if (quality.nextAction === "manual_correction") counts.manual += 1;
+    else if (quality.nextAction === "replace") counts.replace += 1;
+    else counts[quality.kind] += 1;
     return counts;
-  }, { pending: 0, review: 0, manual: 0 });
+  }, { pending: 0, review: 0, manual: 0, replace: 0 });
 
   async function deleteDocument(document: UploadedDocument) {
     if (isWorking || !window.confirm(`'${document.file_name}'을(를) 삭제할까요?`)) return;
@@ -100,7 +102,8 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
 
     {documents.length > 0 ? <section className="extraction-quality-center" aria-label="추출 품질 요약">
       <div><span>자동 추출</span><b>{qualityCounts.review}</b><small>원본 대조 필요</small></div>
-      <div><span>직접 보정</span><b>{qualityCounts.manual}</b><small>실패 사유 확인</small></div>
+      <div><span>직접 보정</span><b>{qualityCounts.manual}</b><small>원본을 보고 값 입력</small></div>
+      <div><span>고지서 교체</span><b>{qualityCounts.replace}</b><small>다른 파일 업로드 필요</small></div>
       <div><span>처리 대기</span><b>{qualityCounts.pending}</b><small>추출 시작 전</small></div>
     </section> : null}
 
@@ -116,7 +119,7 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
               <td>{formatSize(document.size_bytes)}</td>
               <td><span className={`status-pill quality-${quality.kind}`}>{quality.label}</span>{document.parsed_kwh !== null ? <small className="document-value">{formatMonth(document.parsed_month)} · {Number(document.parsed_kwh).toLocaleString()} kWh</small> : null}</td>
               <td><p className="quality-description">{quality.description}</p></td>
-              <td><div className="document-actions"><a href={`/api/projects/${projectId}/uploads/${document.id}?raw=1`} target="_blank" rel="noreferrer">원본 보기</a>{quality.kind === "manual" ? <button disabled={isWorking} onClick={() => setCorrectionDocument(document)} type="button">직접 보정</button> : null}<button disabled={isWorking} onClick={() => deleteDocument(document)} type="button">삭제·교체</button></div></td>
+              <td><div className="document-actions"><a href={`/api/projects/${projectId}/uploads/${document.id}?raw=1`} target="_blank" rel="noreferrer">원본 보기</a>{quality.nextAction === "manual_correction" ? <button disabled={isWorking} onClick={() => setCorrectionDocument(document)} type="button">직접 보정</button> : null}<button disabled={isWorking} onClick={() => deleteDocument(document)} type="button">{quality.nextAction === "replace" ? "삭제 후 교체" : "삭제·교체"}</button></div></td>
             </tr>;
           })}
         </tbody>
