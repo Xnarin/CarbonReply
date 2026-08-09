@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { registerCompany, signInCompany } from "@/app/actions/auth";
 
 const initialAuthState: { error?: string; emailSent?: string; companyName?: string } = {};
@@ -23,19 +23,28 @@ function AuthHeader({ mode }: { mode: "login" | "signup" }) {
 }
 
 function ServiceGuide() {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   return (
-    <details className="access-guide">
-      <summary>기능 설명 보기 <span aria-hidden="true">+</span></summary>
-      <div className="access-guide-content">
-        <p>사업장 전기요금 고지서를 바탕으로 Scope 2 전력 사용량과 간이 배출량을 정리하는 서비스입니다.</p>
-        <ol>
-          <li><b>프로젝트 생성</b><span>회사와 산정 연도를 선택합니다.</span></li>
-          <li><b>고지서 업로드</b><span>월별 전기요금 고지서 PDF를 올립니다.</span></li>
-          <li><b>추출값 확인·확정</b><span>원본 PDF와 사용량을 대조한 뒤 결과를 저장합니다.</span></li>
-        </ol>
-        <small>자동 추출값은 반드시 원본 고지서와 대조해 주세요. 법정 검증·공시용 배출량 산정 서비스는 아닙니다.</small>
-      </div>
-    </details>
+    <>
+      <button className="access-guide-trigger" onClick={() => dialogRef.current?.showModal()} type="button">
+        기능·테스트 안내 보기 <span aria-hidden="true">↗</span>
+      </button>
+      <dialog aria-labelledby="service-guide-title" className="access-guide-dialog" ref={dialogRef}>
+        <section className="access-guide-modal">
+          <header>
+            <div><p>CARBONREPLY GUIDE</p><h2 id="service-guide-title">기능·테스트 안내</h2></div>
+            <button aria-label="안내 닫기" onClick={() => dialogRef.current?.close()} type="button">×</button>
+          </header>
+          <div className="access-guide-content">
+            <section><span>WHY</span><h3>왜 필요한가요?</h3><p>사업장 전기요금 고지서에서 전력 사용량을 정리하고, Scope 2 전력 사용 기반 배출량을 간이 추정합니다.</p></section>
+            <section><span>FLOW</span><h3>어떻게 사용하나요?</h3><ol><li><b>프로젝트 생성</b><p>회사와 산정 연도를 선택합니다.</p></li><li><b>고지서 업로드</b><p>월별 전기요금 고지서 PDF를 올립니다.</p></li><li><b>추출값 확인·확정</b><p>원본 PDF와 사용량을 대조한 뒤 결과를 저장합니다.</p></li></ol></section>
+            <section className="guide-test-section"><span>TEST</span><h3>테스트를 시작하세요</h3><dl><div><dt>회사명</dt><dd>아이엠</dd></div><div><dt>비밀번호</dt><dd>a123456789</dd></div></dl><a download href="/test-data/CarbonReply-test-data.zip">테스트 데이터 ZIP 다운로드 <b>↓</b></a><p className="guide-test-copy">정상 고지서 12개월을 먼저 업로드한 뒤, 예외 자료로 경고와 교체 흐름을 확인해 주세요.</p></section>
+            <small>자동 추출값은 반드시 원본 고지서와 대조해 주세요. 법정 검증·공시용 배출량 산정 서비스는 아닙니다.</small>
+          </div>
+        </section>
+      </dialog>
+    </>
   );
 }
 
