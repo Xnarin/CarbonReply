@@ -77,7 +77,7 @@ export function NewProjectForm({ companyName, existingProjects }: { companyName:
         <section className="workbench-main">
           <div className="section-intro"><p className="eyebrow">01 / PROJECT SETUP</p><h1>산정 설정</h1><p>산정 연도를 고르면 다음 단계에서 전기요금 고지서를 업로드할 수 있습니다.</p></div>
           <div className="project-fields">
-            <label className="field-label">회사명<input defaultValue={companyName} name="companyName" readOnly /></label>
+            <div className="field-label company-display-field"><span>회사명</span><div><b>{companyName}</b><small>로그인한 회사</small></div></div>
             <fieldset className="year-field"><legend className="field-label">산정 연도</legend><div className="year-options">{[currentYear - 2, currentYear - 1, currentYear].map((year) => <label key={year}><input checked={year === selectedYear} name="targetYear" onChange={() => setSelectedYear(year)} type="radio" value={year} /><span>{year}</span></label>)}</div></fieldset>
           </div>
           <section className="setup-guide blueprint-frame"><CornerMarks /><p className="card-kicker">CALCULATION SCOPE</p><dl className="scope-list"><div><dt>산정 범위</dt><dd>사업장 구매전력 · Scope 2</dd></div><div><dt>입력 자료</dt><dd>전기요금 고지서 PDF</dd></div><div><dt>계산 기준</dt><dd>전력 사용량 × {selectedFactor.value} {selectedFactor.unit}</dd></div></dl><p>선택한 연도의 고지서를 모아 연간 추정치를 계산합니다. 다른 에너지원은 이 MVP에 포함하지 않습니다.</p></section>
