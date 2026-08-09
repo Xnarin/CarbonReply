@@ -1,4 +1,5 @@
 import { NewProjectForm } from "@/components/new-project-form";
+import { ProjectTransitionPanel } from "@/components/project-transition-panel";
 import { requireCurrentCompany } from "@/lib/current-company";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
@@ -16,5 +17,5 @@ export default async function Home() {
     ? await supabase.from("reports").select("project_id, total_kwh, total_tco2e").in("project_id", projectIds)
     : { data: [] };
   const summaries = new Map((reports ?? []).map((report) => [report.project_id, { totalKwh: Number(report.total_kwh), totalTco2e: Number(report.total_tco2e) }]));
-  return <NewProjectForm companyName={company.company_name} existingProjects={(projects ?? []).map((project) => ({ ...project, summary: summaries.get(project.id) }))} />;
+  return <ProjectTransitionPanel><NewProjectForm companyName={company.company_name} existingProjects={(projects ?? []).map((project) => ({ ...project, summary: summaries.get(project.id) }))} /></ProjectTransitionPanel>;
 }
