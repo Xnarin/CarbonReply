@@ -46,10 +46,11 @@ function ProjectRecords({ existingProjects }: { existingProjects: ExistingProjec
       <motion.div
         animate={{ opacity: 1, x: 0 }}
         className="project-list"
-        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
-        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 10 }}
+        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -22 }}
+        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 22 }}
         key={recordTab}
-        transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+        style={{ willChange: "transform, opacity" }}
+        transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
       >
         {visibleProjects.length === 0 ? <p className="record-empty">{recordTab === "active" ? "진행 중인 산정이 없습니다." : "아직 확정된 결과가 없습니다."}</p> : visibleProjects.map((project) => {
           const isCompleted = project.status === "completed";
