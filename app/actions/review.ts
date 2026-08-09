@@ -15,7 +15,8 @@ function describeValidation(activities: Array<{ month: string; kwh: number; conf
   return `주의 사용량 ${validation.outlierMonths.length + validation.zeroUsageMonths.length}건 원본 대조 완료`;
 }
 
-export async function confirmMonthlyUsage(formData: FormData) {
+/** Save a corrected monthly value. Final confirmation is handled only at project level. */
+export async function saveMonthlyUsage(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
   const month = String(formData.get("month") ?? "");
   const kwh = Number(formData.get("kwh"));
@@ -27,7 +28,8 @@ export async function confirmMonthlyUsage(formData: FormData) {
   const { data: project } = await supabase.from("projects").select("id, target_year, status").eq("id", projectId).eq("company_id", company.id).maybeSingle();
   if (!project || project.status === "completed" || !month.startsWith(`${project.target_year}-`)) return { ok: false };
 
-  const { error } = await supabase.from("monthly_activity").update({ kwh, confirmed: true }).eq("project_id", projectId).eq("month", month);
+  // Changing a value requires a fresh, project-level final confirmation.
+  const { error } = await supabase.from("monthly_activity").update({ kwh, confirmed: false }).eq("project_id", projectId).eq("month", month);
   if (error) return { ok: false };
   revalidatePath(`/projects/${projectId}/review`);
   return { ok: true };
@@ -44,10 +46,6 @@ export async function confirmAllMonthlyUsage(formData: FormData) {
 
   const { data: activities } = await supabase.from("monthly_activity").select("month, kwh, confirmed").eq("project_id", projectId);
   if (!activities?.length) return { ok: false };
-  const validation = analyzeMonthlyUsage(activities, project.target_year);
-  const warningMonths = new Set([...validation.invalidMonths, ...validation.outlierMonths, ...validation.zeroUsageMonths]);
-  if (activities.some((activity) => warningMonths.has(activity.month) && !activity.confirmed)) return { ok: false };
-
   const { error } = await supabase.from("monthly_activity").update({ confirmed: true }).eq("project_id", projectId);
   if (error) return { ok: false };
   revalidatePath(`/projects/${projectId}/review`);

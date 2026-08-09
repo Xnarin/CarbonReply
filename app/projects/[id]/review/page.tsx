@@ -52,14 +52,13 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const outlierMonths = new Set(validation.outlierMonths);
   const zeroUsageMonths = new Set(validation.zeroUsageMonths);
   const warningMonths = new Set([...validation.invalidMonths, ...validation.outlierMonths, ...validation.zeroUsageMonths]);
-  const hasUnconfirmedWarning = rows.some((row) => warningMonths.has(row.month) && !row.confirmed);
   const canCreateReport = finalization.canFinalize;
 
   return <main className="review-page"><section className="review-panel">
     <ProjectProgress activeStep={3} projectId={project.id} />
     <header className="review-header"><div><p>03 / EXTRACTION REVIEW</p><h1>추출 결과 확인</h1><span>{project.company_name} · {project.target_year}년 전기 사용량</span></div><Link href={`/projects/${project.id}/upload`} className="back-link">고지서 추가하기</Link></header>
     <ConfirmationOptimisticProvider>
-    <section className="review-command"><div><span>확정 진행</span><b>{confirmedCount} / {rows.length}개월</b><p>{hasUnconfirmedWarning ? "주의 항목은 원본과 대조해 개별 확정한 뒤 전체 확정을 사용할 수 있습니다." : "각 사용량을 고지서와 비교한 뒤 확정하세요. 전체 확정은 현재 추출된 값을 모두 확정합니다."}</p></div><ConfirmAllUsageForm allConfirmed={canCreateReport} disabled={hasUnconfirmedWarning || rows.length === 0} projectId={project.id} /></section>
+    <section className="review-command"><div><span>전체 확정 진행</span><b>{confirmedCount} / {rows.length}개월</b><p>{warningMonths.size > 0 ? "주의 항목은 원본 고지서와 대조해 필요하면 값을 수정·저장한 뒤, 전체 사용량을 확정해 주세요." : "각 사용량을 고지서와 비교해 필요하면 수정·저장하세요. 최종 확정은 전체 사용량 확정 버튼에서 한 번만 진행합니다."}</p></div><ConfirmAllUsageForm allConfirmed={canCreateReport} disabled={rows.length === 0} projectId={project.id} /></section>
     <div className="review-summary"><section><span>확정 전기 사용량</span><strong>{totalKwh.toLocaleString()}<i> kWh</i></strong><p>확정 전 수치도 합계에는 포함됩니다.</p></section><section className="emission-total"><span>Scope 2 추정 배출량</span><strong>{(totalKg / 1000).toFixed(3)}<i> tCO₂e</i></strong><p>{totalKwh.toLocaleString()} kWh × {electricityFactor.value} {electricityFactor.unit}</p></section></div>
     <section className={`validation-board validation-grade-${validation.grade.toLowerCase()}`}>
       <div><span>DATA CHECK</span><strong>검증 등급 {validation.grade}</strong></div>

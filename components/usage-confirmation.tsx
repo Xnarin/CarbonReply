@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, ReactNode, createContext, useContext, useState, useTransition } from "react";
-import { confirmAllMonthlyUsage, confirmMonthlyUsage } from "@/app/actions/review";
+import { useRouter } from "next/navigation";
+import { confirmAllMonthlyUsage, saveMonthlyUsage } from "@/app/actions/review";
 
 type OptimisticContextValue = {
   allOptimistic: boolean;
@@ -47,30 +48,35 @@ export function ConfirmAllUsageForm({ allConfirmed, disabled, projectId }: { all
 
 export function UsageConfirmationCells({ confirmed, emissionsKg, kwh, month, monthLabel, projectId }: { confirmed: boolean; emissionsKg: number; kwh: number; month: string; monthLabel: string; projectId: string }) {
   const { allOptimistic } = useConfirmationOptimistic();
-  const [localConfirmed, setLocalConfirmed] = useState(confirmed);
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+  const [savedKwh, setSavedKwh] = useState(kwh);
   const [failed, setFailed] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const hasValidBillUsage = kwh > 0;
-  const displayConfirmed = confirmed || localConfirmed || allOptimistic;
+  const displayConfirmed = confirmed || allOptimistic;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isPending || allOptimistic) return;
+    if (isPending || allOptimistic || !isEditing) return;
     const formData = new FormData(event.currentTarget);
+    const nextKwh = Number(formData.get("kwh"));
+    if (!Number.isFinite(nextKwh) || nextKwh <= 0) return;
     setFailed(false);
-    setLocalConfirmed(true);
     startTransition(async () => {
-      const result = await confirmMonthlyUsage(formData);
+      const result = await saveMonthlyUsage(formData);
       if (!result.ok) {
-        setLocalConfirmed(confirmed);
         setFailed(true);
+        return;
       }
+      setSavedKwh(nextKwh);
+      setIsEditing(false);
+      router.refresh();
     });
   }
 
   return <>
-    <td><form className="usage-form" onSubmit={submit}><input name="projectId" type="hidden" value={projectId} /><input name="month" type="hidden" value={month} /><input aria-label={`${monthLabel} 전기 사용량`} defaultValue={kwh} max="100000000" min="0.01" name="kwh" step="0.01" type="number" /><span>kWh</span><button className={`confirm-usage-button ${displayConfirmed ? "is-optimistic" : ""}`} disabled={!hasValidBillUsage || isPending || allOptimistic} title={!hasValidBillUsage ? "0 kWh는 전기요금 고지서의 확정값으로 사용할 수 없습니다." : undefined} type="submit">{!hasValidBillUsage ? "고지서 다시 확인" : isPending ? "확정됨 · 저장 중" : confirmed ? "수정값 확정" : displayConfirmed ? "확정됨" : "이 값 확정"}</button></form></td>
+    <td><form className="usage-form" onSubmit={submit}><input name="projectId" type="hidden" value={projectId} /><input name="month" type="hidden" value={month} />{isEditing ? <><input aria-label={`${monthLabel} 전기 사용량`} autoFocus defaultValue={savedKwh} max="100000000" min="0.01" name="kwh" step="0.01" type="number" /><span>kWh</span><button className="save-usage-button" disabled={isPending || allOptimistic} type="submit">{isPending ? "저장 중" : "저장"}</button><button className="cancel-usage-button" disabled={isPending} onClick={() => { setIsEditing(false); setFailed(false); }} type="button">취소</button></> : <><strong className="usage-value">{savedKwh.toLocaleString()} <span>kWh</span></strong><button className="edit-usage-button" disabled={allOptimistic} onClick={() => { setIsEditing(true); setFailed(false); }} type="button">수정</button></>}</form></td>
     <td>{emissionsKg.toFixed(1)} kgCO₂e</td>
-    <td><span className={`review-status ${displayConfirmed ? "is-confirmed" : ""} ${isPending || allOptimistic ? "is-saving" : ""}`}>{isPending || allOptimistic ? "확정됨 · 저장 중" : displayConfirmed ? "확정됨" : "확인 필요"}</span>{failed ? <small className="confirmation-error" role="alert">저장 실패</small> : null}</td>
+    <td><span className={`review-status ${displayConfirmed ? "is-confirmed" : ""} ${isPending || allOptimistic ? "is-saving" : ""}`}>{isPending || allOptimistic ? "저장 중" : displayConfirmed ? "전체 확정됨" : "검토 중"}</span>{failed ? <small className="confirmation-error" role="alert">저장 실패</small> : null}</td>
   </>;
 }
