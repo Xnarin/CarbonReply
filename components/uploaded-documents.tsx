@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getExtractionQuality, type ParseErrorCode } from "@/lib/extraction-quality";
+import { OriginalPdfDialog } from "@/components/original-pdf-dialog";
 
 export type UploadedDocument = {
   id: string;
@@ -101,7 +102,7 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
 
   return <section className="uploaded-files" aria-labelledby="uploaded-files-title">
     <div className="uploaded-files-heading">
-      <div><h2 id="uploaded-files-title">업로드된 고지서 <b>{documents.length}</b></h2><span>추출 전에는 삭제·교체할 수 있고, 실패한 파일은 원본을 보며 직접 보정할 수 있습니다.</span></div>
+      <div><h2 id="uploaded-files-title">업로드된 고지서 <b>{documents.length}</b></h2><span>추출 전에는 삭제할 수 있고, 실패한 파일은 원본을 보며 직접 보정할 수 있습니다.</span></div>
       {queuedDocuments.length > 0 ? <div className="extraction-command"><button className="extract-start-button" disabled={isWorking} onClick={startExtraction} type="button">{isWorking ? "사용량 추출 중" : `업로드 확인 및 추출 시작 (${queuedDocuments.length})`}</button>{extractionProgress !== null ? <div aria-live="polite" className="extraction-progress" role="status"><span>{extractionProgress} / {queuedDocuments.length}</span><i><b style={{ width: `${(extractionProgress / queuedDocuments.length) * 100}%` }} /></i></div> : null}</div> : null}
     </div>
 
@@ -124,7 +125,7 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
               <td>{formatSize(document.size_bytes)}</td>
               <td><span className={`status-pill quality-${quality.kind}`}>{quality.label}</span>{document.parsed_kwh !== null ? <small className="document-value">{formatMonth(document.parsed_month)} · {Number(document.parsed_kwh).toLocaleString()} kWh</small> : null}</td>
               <td><p className="quality-description">{quality.description}</p></td>
-              <td><div className="document-actions"><a href={`/api/projects/${projectId}/uploads/${document.id}?raw=1`} target="_blank" rel="noreferrer">원본 보기</a>{quality.nextAction === "manual_correction" ? <button disabled={isWorking} onClick={() => setCorrectionDocument(document)} type="button">직접 보정</button> : null}<button disabled={isWorking} onClick={() => deleteDocument(document)} type="button">{quality.nextAction === "replace" ? "삭제 후 교체" : "삭제·교체"}</button></div></td>
+              <td><div className="document-actions"><OriginalPdfDialog buttonLabel="원본 보기" fileName={document.file_name} sourceUrl={`/api/projects/${projectId}/uploads/${document.id}`} usageKwh={document.parsed_kwh ?? undefined} />{quality.nextAction === "manual_correction" ? <button disabled={isWorking} onClick={() => setCorrectionDocument(document)} type="button">직접 보정</button> : null}<button disabled={isWorking} onClick={() => deleteDocument(document)} type="button">삭제</button></div></td>
             </tr>;
           })}
         </tbody>

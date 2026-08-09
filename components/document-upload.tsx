@@ -25,7 +25,7 @@ function isZip(file: File) {
 }
 
 function zipEntryFileName(path: string) {
-  return path.split("/").filter(Boolean).at(-1) ?? "bill.pdf";
+  return path.split(/[\\/]/).filter(Boolean).at(-1) ?? "bill.pdf";
 }
 
 async function extractPdfFiles(zipFile: File): Promise<File[]> {
