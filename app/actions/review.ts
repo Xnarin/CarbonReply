@@ -15,7 +15,7 @@ function describeValidation(activities: Array<{ month: string; kwh: number; conf
   return `주의 사용량 ${validation.outlierMonths.length + validation.zeroUsageMonths.length}건 원본 대조 완료`;
 }
 
-/** Save a corrected monthly value. Final confirmation is handled only at project level. */
+/** Save a corrected monthly value and confirm that reviewed month. */
 export async function saveMonthlyUsage(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
   const month = String(formData.get("month") ?? "");
@@ -28,8 +28,8 @@ export async function saveMonthlyUsage(formData: FormData) {
   const { data: project } = await supabase.from("projects").select("id, target_year, status").eq("id", projectId).eq("company_id", company.id).maybeSingle();
   if (!project || project.status === "completed" || !month.startsWith(`${project.target_year}-`)) return { ok: false };
 
-  // Changing a value requires a fresh, project-level final confirmation.
-  const { error } = await supabase.from("monthly_activity").update({ kwh, confirmed: false }).eq("project_id", projectId).eq("month", month);
+  // Saving is the explicit reviewer acknowledgement for this one month.
+  const { error } = await supabase.from("monthly_activity").update({ kwh, confirmed: true }).eq("project_id", projectId).eq("month", month);
   if (error) return { ok: false };
   revalidatePath(`/projects/${projectId}/review`);
   return { ok: true };
