@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { createProject } from "@/app/actions/projects";
-import { signOut } from "@/app/actions/auth";
 import { ProjectProgress } from "@/components/project-progress";
 import { ELECTRICITY_FACTOR_SOURCE_URL, getElectricityFactor } from "@/lib/emission-factor";
 
@@ -72,7 +71,7 @@ export function NewProjectForm({ companyName, existingProjects }: { companyName:
   return <form action={formAction} className="workbench-shell">
     <div className="workbench-frame">
       <p className="pipeline-label">SCOPE 2 · 전기요금 고지서 파이프라인</p>
-      <ProjectProgress activeStep={1} onLogout={signOut} />
+      <ProjectProgress activeStep={1} showLogout />
       <div className="workbench-body setup-body">
         <section className="workbench-main">
           <div className="section-intro"><p className="eyebrow">01 / PROJECT SETUP</p><h1>산정 설정</h1><p>산정 연도를 고르면 다음 단계에서 전기요금 고지서를 업로드할 수 있습니다.</p></div>
