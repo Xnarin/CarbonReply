@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 import { OriginalPdfDialog } from "@/components/original-pdf-dialog";
 import { ProjectProgress } from "@/components/project-progress";
 import { ConfirmationOptimisticProvider, ConfirmAllUsageForm, UsageConfirmationCells } from "@/components/usage-confirmation";
@@ -56,7 +57,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
 
   return <main className="review-page"><section className="review-panel">
     <ProjectProgress activeStep={3} projectId={project.id} />
-    <header className="review-header"><div><p>03 / EXTRACTION REVIEW</p><h1>추출 결과 확인</h1><span>{project.company_name} · {project.target_year}년 전기 사용량</span></div><a href={`/projects/${project.id}/upload`} className="back-link">고지서 추가하기</a></header>
+    <header className="review-header"><div><p>03 / EXTRACTION REVIEW</p><h1>추출 결과 확인</h1><span>{project.company_name} · {project.target_year}년 전기 사용량</span></div><Link href={`/projects/${project.id}/upload`} className="back-link">고지서 추가하기</Link></header>
     <ConfirmationOptimisticProvider>
     <section className="review-command"><div><span>확정 진행</span><b>{confirmedCount} / {rows.length}개월</b><p>{hasUnconfirmedWarning ? "주의 항목은 원본과 대조해 개별 확정한 뒤 전체 확정을 사용할 수 있습니다." : "각 사용량을 고지서와 비교한 뒤 확정하세요. 전체 확정은 현재 추출된 값을 모두 확정합니다."}</p></div><ConfirmAllUsageForm allConfirmed={canCreateReport} disabled={hasUnconfirmedWarning || rows.length === 0} projectId={project.id} /></section>
     <div className="review-summary"><section><span>확정 전기 사용량</span><strong>{totalKwh.toLocaleString()}<i> kWh</i></strong><p>확정 전 수치도 합계에는 포함됩니다.</p></section><section className="emission-total"><span>Scope 2 추정 배출량</span><strong>{(totalKg / 1000).toFixed(3)}<i> tCO₂e</i></strong><p>{totalKwh.toLocaleString()} kWh × {electricityFactor.value} {electricityFactor.unit}</p></section></div>
@@ -84,7 +85,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
         })}
       </div>
     </section>
-    <footer className="review-next">{canCreateReport ? <><span>모든 사용량을 확정했습니다. 최종 계산 결과를 확인할 수 있습니다.</span><a href={`/projects/${project.id}/report`}>결과 리포트 보기</a></> : <><span>전체 사용량을 확정하거나, 월별로 값을 확정해 주세요.</span><button disabled type="button">결과 리포트 보기</button></>}</footer>
+    <footer className="review-next">{canCreateReport ? <><span>모든 사용량을 확정했습니다. 최종 계산 결과를 확인할 수 있습니다.</span><Link href={`/projects/${project.id}/report`}>결과 리포트 보기</Link></> : <><span>전체 사용량을 확정하거나, 월별로 값을 확정해 주세요.</span><button disabled type="button">결과 리포트 보기</button></>}</footer>
     </ConfirmationOptimisticProvider>
   </section></main>;
 }

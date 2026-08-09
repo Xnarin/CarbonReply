@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { createProject } from "@/app/actions/projects";
@@ -55,7 +56,7 @@ function ProjectRecords({ existingProjects }: { existingProjects: ExistingProjec
         {visibleProjects.length === 0 ? <p className="record-empty">{recordTab === "active" ? "진행 중인 산정이 없습니다." : "아직 확정된 결과가 없습니다."}</p> : visibleProjects.map((project) => {
           const isCompleted = project.status === "completed";
           const href = isCompleted ? `/projects/${project.id}/report` : project.status === "reviewing" ? `/projects/${project.id}/review` : `/projects/${project.id}/upload`;
-          return <a href={href} key={project.id}><b>{project.target_year}년 전기 사용량</b>{isCompleted && project.summary ? <small>확정 {project.summary.totalKwh.toLocaleString()} kWh · {project.summary.totalTco2e.toFixed(3)} tCO₂e</small> : null}<span>{isCompleted ? "확정 결과 다시 보기" : project.status === "reviewing" ? "사용량 검토 계속하기" : "고지서 업로드 계속하기"} →</span></a>;
+          return <Link href={href} key={project.id}><b>{project.target_year}년 전기 사용량</b>{isCompleted && project.summary ? <small>확정 {project.summary.totalKwh.toLocaleString()} kWh · {project.summary.totalTco2e.toFixed(3)} tCO₂e</small> : null}<span>{isCompleted ? "확정 결과 다시 보기" : project.status === "reviewing" ? "사용량 검토 계속하기" : "고지서 업로드 계속하기"} →</span></Link>;
         })}
       </motion.div>
     </AnimatePresence>

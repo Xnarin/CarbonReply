@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 import { DocumentUpload } from "@/components/document-upload";
 import { UploadedDocuments, type UploadedDocument } from "@/components/uploaded-documents";
 import { ProjectProgress } from "@/components/project-progress";
@@ -55,7 +56,7 @@ export default async function UploadPage({ params }: UploadPageProps) {
 
         <footer className="upload-footer">
           <span>{canOpenReview ? "정상 추출된 고지서를 검토할 수 있습니다." : "전기요금 고지서를 정상 추출한 뒤 다음 단계로 진행할 수 있습니다."}</span>
-          {canOpenReview ? <a className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</a> : <button disabled type="button">추출 결과 확인하기</button>}
+          {canOpenReview ? <Link className="upload-review-link" href={`/projects/${project.id}/review`}>추출 결과 확인하기</Link> : <button disabled type="button">추출 결과 확인하기</button>}
         </footer>
       </section>
     </main>
