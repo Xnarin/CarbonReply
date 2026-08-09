@@ -27,6 +27,7 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
   const router = useRouter();
   const [isWorking, setIsWorking] = useState(false);
   const [message, setMessage] = useState("");
+  const [extractionProgress, setExtractionProgress] = useState<number | null>(null);
   const [correctionDocument, setCorrectionDocument] = useState<UploadedDocument | null>(null);
   const queuedDocuments = documents.filter((document) => document.parse_status === "uploading");
   const qualityCounts = documents.reduce((counts, document) => {
@@ -57,18 +58,22 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
     if (queuedDocuments.length === 0 || isWorking) return;
     setIsWorking(true);
     setMessage("");
+    setExtractionProgress(0);
     const notices: string[] = [];
-    for (const document of queuedDocuments) {
+    for (const [index, document] of queuedDocuments.entries()) {
       try {
         const response = await fetch(`/api/projects/${projectId}/uploads/${document.id}/complete`, { method: "POST" });
         const body = await response.json() as { error?: string };
         if (!response.ok) notices.push(`${document.file_name}: ${body.error ?? "추출하지 못했습니다."}`);
       } catch {
         notices.push(`${document.file_name}: 처리 중 연결 문제가 발생했습니다.`);
+      } finally {
+        setExtractionProgress(index + 1);
       }
     }
     setMessage(notices.length > 0 ? notices.join(" ") : `${queuedDocuments.length}개 고지서의 사용량을 추출했습니다.`);
     setIsWorking(false);
+    setExtractionProgress(null);
     router.refresh();
   }
 
@@ -97,7 +102,7 @@ export function UploadedDocuments({ documents, projectId }: { documents: Uploade
   return <section className="uploaded-files" aria-labelledby="uploaded-files-title">
     <div className="uploaded-files-heading">
       <div><h2 id="uploaded-files-title">업로드된 고지서 <b>{documents.length}</b></h2><span>추출 전에는 삭제·교체할 수 있고, 실패한 파일은 원본을 보며 직접 보정할 수 있습니다.</span></div>
-      {queuedDocuments.length > 0 ? <button className="extract-start-button" disabled={isWorking} onClick={startExtraction} type="button">{isWorking ? "사용량 추출 중" : `업로드 확인 및 추출 시작 (${queuedDocuments.length})`}</button> : null}
+      {queuedDocuments.length > 0 ? <div className="extraction-command"><button className="extract-start-button" disabled={isWorking} onClick={startExtraction} type="button">{isWorking ? "사용량 추출 중" : `업로드 확인 및 추출 시작 (${queuedDocuments.length})`}</button>{extractionProgress !== null ? <div aria-live="polite" className="extraction-progress" role="status"><span>{extractionProgress} / {queuedDocuments.length}</span><i><b style={{ width: `${(extractionProgress / queuedDocuments.length) * 100}%` }} /></i></div> : null}</div> : null}
     </div>
 
     {documents.length > 0 ? <section className="extraction-quality-center" aria-label="추출 품질 요약">
