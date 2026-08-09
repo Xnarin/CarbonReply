@@ -20,7 +20,8 @@ export async function updateSession(request: NextRequest) {
   });
 
   const { data } = await supabase.auth.getClaims();
-  const isPublicPath = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup") || request.nextUrl.pathname.startsWith("/auth/") || request.nextUrl.pathname === "/test-data/CarbonReply-test-data.zip";
+  const isTestDataPath = ["/test-data/CarbonReply-test-data.zip", "/test-data/CarbonReply-test-exceptions.zip"].includes(request.nextUrl.pathname);
+  const isPublicPath = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup") || request.nextUrl.pathname.startsWith("/auth/") || isTestDataPath;
   if (!data?.claims && !isPublicPath) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
